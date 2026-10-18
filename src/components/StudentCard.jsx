@@ -1,10 +1,5 @@
+import StatusBadge from './StatusBadge'
 import './StudentCard.css'
-
-const STATUS_LABELS = {
-  active: 'Active',
-  probation: 'On probation',
-  graduated: 'Graduated',
-}
 
 function getInitials(name) {
   return name
@@ -63,9 +58,7 @@ export default function StudentCard({
           <h3 className="student-card__name">{name}</h3>
           <p className="student-card__roll">{rollNo}</p>
         </div>
-        <span className={`student-card__badge student-card__badge--${status}`}>
-          {STATUS_LABELS[status] ?? status}
-        </span>
+        <StatusBadge status={status} />
       </header>
 
       <dl className="student-card__meta">
@@ -73,12 +66,12 @@ export default function StudentCard({
           <dt>Course</dt>
           <dd>{course}</dd>
         </div>
-        {year && (
+        {/* {year && (
           <div>
             <dt>Year</dt>
             <dd>{year}</dd>
           </div>
-        )}
+        )} */}
         {typeof gpa === 'number' && (
           <div>
             <dt>GPA</dt>

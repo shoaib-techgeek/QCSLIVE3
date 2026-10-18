@@ -63,28 +63,6 @@
   color: var(--text);
 }
 
-.student-card__badge {
-  flex: none;
-  padding: 4px 10px;
-  font-size: 12px;
-  font-weight: 600;
-  border-radius: 999px;
-  white-space: nowrap;
-}
-
-.student-card__badge--active {
-  color: var(--ok-text);
-  background: var(--ok-bg);
-}
-.student-card__badge--probation {
-  color: var(--warn-text);
-  background: var(--warn-bg);
-}
-.student-card__badge--graduated {
-  color: var(--info-text);
-  background: var(--info-bg);
-}
-
 .student-card__meta {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));

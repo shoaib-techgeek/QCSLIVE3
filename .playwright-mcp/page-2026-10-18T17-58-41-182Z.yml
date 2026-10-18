@@ -1,0 +1,159 @@
+- generic [ref=e3]:
+  - link "Skip to content" [ref=e4] [cursor=pointer]:
+    - /url: "#main"
+  - complementary "Sidebar" [ref=e5]:
+    - generic [ref=e6]:
+      - link "Northbridge" [ref=e7] [cursor=pointer]:
+        - /url: /admin
+      - button "Close menu" [ref=e202] [cursor=pointer]
+    - navigation "Main" [ref=e11]:
+      - paragraph [ref=e12]: Manage
+      - list [ref=e13]:
+        - listitem [ref=e14]:
+          - link "Dashboard" [ref=e15] [cursor=pointer]:
+            - /url: /admin
+        - listitem [ref=e19]:
+          - link "Applications 3 pending" [ref=e20] [cursor=pointer]:
+            - /url: /admin/applications
+            - generic [ref=e23]: Applications
+            - generic "3 pending" [ref=e24]: "3"
+        - listitem [ref=e25]:
+          - link "Students" [ref=e26] [cursor=pointer]:
+            - /url: /admin/students
+    - paragraph [ref=e30]: University Registration · v1.0
+  - generic [ref=e31]:
+    - banner [ref=e32]:
+      - button "Open menu" [expanded] [active] [ref=e206] [cursor=pointer]
+      - heading "Dashboard" [level=1] [ref=e33]
+      - generic [ref=e34]:
+        - generic [aria-hidden] [ref=e36]: RA
+        - button "Sign out" [ref=e40] [cursor=pointer]
+    - main [ref=e44]:
+      - generic [ref=e45]:
+        - region "Key figures" [ref=e46]:
+          - generic [ref=e51]:
+            - paragraph [ref=e52]: Enrolled students
+            - paragraph [ref=e53]: "9"
+            - paragraph [ref=e54]: Active + on probation
+          - generic [ref=e59]:
+            - paragraph [ref=e60]: Pending applications
+            - paragraph [ref=e61]: "3"
+            - paragraph [ref=e62]: Awaiting review
+          - generic [ref=e67]:
+            - paragraph [ref=e68]: Graduates
+            - paragraph [ref=e69]: "2"
+            - paragraph [ref=e70]: All time
+          - generic [ref=e75]:
+            - paragraph [ref=e76]: Average GPA
+            - paragraph [ref=e77]: "3.27"
+            - paragraph [ref=e78]: Enrolled students
+        - generic [ref=e79]:
+          - region [ref=e80]:
+            - heading "Enrolment by program" [level=2] [ref=e81]
+            - list [ref=e82]:
+              - listitem [ref=e83]:
+                - generic [ref=e84]: Computer Science
+                - generic [ref=e87]: "2"
+              - listitem [ref=e88]:
+                - generic [ref=e89]: Business Admin
+                - generic [ref=e92]: "2"
+              - listitem [ref=e93]:
+                - generic [ref=e94]: Electrical Eng.
+                - generic [ref=e97]: "1"
+              - listitem [ref=e98]:
+                - generic [ref=e99]: Mechanical Eng.
+                - generic [ref=e102]: "1"
+              - listitem [ref=e103]:
+                - generic [ref=e104]: Architecture
+                - generic [ref=e107]: "1"
+              - listitem [ref=e108]:
+                - generic [ref=e109]: Medicine
+                - generic [ref=e112]: "1"
+              - listitem [ref=e113]:
+                - generic [ref=e114]: Law
+                - generic [ref=e117]: "1"
+          - region [ref=e118]:
+            - heading "Records by status" [level=2] [ref=e119]
+            - list [ref=e126]:
+              - listitem [ref=e127]:
+                - text: Active
+                - strong [ref=e129]:
+                  - text: "7"
+                  - generic [ref=e130]: (47%)
+              - listitem [ref=e131]:
+                - text: On probation
+                - strong [ref=e133]:
+                  - text: "2"
+                  - generic [ref=e134]: (13%)
+              - listitem [ref=e135]:
+                - text: Graduated
+                - strong [ref=e137]:
+                  - text: "2"
+                  - generic [ref=e138]: (13%)
+              - listitem [ref=e139]:
+                - text: Pending
+                - strong [ref=e141]:
+                  - text: "3"
+                  - generic [ref=e142]: (20%)
+              - listitem [ref=e143]:
+                - text: Rejected
+                - strong [ref=e145]:
+                  - text: "1"
+                  - generic [ref=e146]: (7%)
+        - generic [ref=e147]:
+          - region [ref=e148]:
+            - generic [ref=e149]:
+              - heading "Recent applications" [level=2] [ref=e150]
+              - link "View all" [ref=e151] [cursor=pointer]:
+                - /url: /admin/applications
+            - table [ref=e153]:
+              - rowgroup [ref=e154]:
+                - row [ref=e155]:
+                  - columnheader "Applicant" [ref=e156]
+                  - columnheader "Program" [ref=e157]
+                  - columnheader "Applied" [ref=e158]
+                  - columnheader "Actions" [ref=e159]
+              - rowgroup [ref=e161]:
+                - row [ref=e162]:
+                  - cell [ref=e163]:
+                    - strong [ref=e164]: Yuki Tanaka
+                    - text: yuki.t@mail.com
+                  - cell "Architecture" [ref=e165]
+                  - cell "Oct 16, 2026" [ref=e166]
+                  - cell [ref=e167]:
+                    - generic [ref=e168]:
+                      - button "Approve Yuki Tanaka" [ref=e169] [cursor=pointer]: Approve
+                      - button "Reject Yuki Tanaka" [ref=e170] [cursor=pointer]: Reject
+                - row [ref=e171]:
+                  - cell [ref=e172]:
+                    - strong [ref=e173]: Emily Brown
+                    - text: emily.brown@mail.com
+                  - cell "Computer Science" [ref=e174]
+                  - cell "Oct 14, 2026" [ref=e175]
+                  - cell [ref=e176]:
+                    - generic [ref=e177]:
+                      - button "Approve Emily Brown" [ref=e178] [cursor=pointer]: Approve
+                      - button "Reject Emily Brown" [ref=e179] [cursor=pointer]: Reject
+                - row [ref=e180]:
+                  - cell [ref=e181]:
+                    - strong [ref=e182]: Hassan Ali
+                    - text: hassan.ali@mail.com
+                  - cell "Medicine" [ref=e183]
+                  - cell "Oct 12, 2026" [ref=e184]
+                  - cell [ref=e185]:
+                    - generic [ref=e186]:
+                      - button "Approve Hassan Ali" [ref=e187] [cursor=pointer]: Approve
+                      - button "Reject Hassan Ali" [ref=e188] [cursor=pointer]: Reject
+          - region [ref=e189]:
+            - heading "Needs attention" [level=2] [ref=e190]
+            - list [ref=e191]:
+              - listitem [ref=e192]:
+                - generic [ref=e193]:
+                  - strong [ref=e194]: Maria Gonzalez
+                  - generic [ref=e195]: BA-2033 · 68% attendance
+                - generic [ref=e196]: On probation
+              - listitem [ref=e197]:
+                - generic [ref=e198]:
+                  - strong [ref=e199]: Noah Williams
+                  - generic [ref=e200]: AR-2077 · 74% attendance
+                - generic [ref=e201]: On probation

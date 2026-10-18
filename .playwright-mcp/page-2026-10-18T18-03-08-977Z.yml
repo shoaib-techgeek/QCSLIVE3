@@ -1,0 +1,127 @@
+- generic [ref=f3e3]:
+  - link "Skip to content" [ref=f3e4] [cursor=pointer]:
+    - /url: "#main"
+  - complementary "Sidebar" [ref=f3e5]:
+    - link "Northbridge" [ref=f3e7] [cursor=pointer]:
+      - /url: /admin
+    - navigation "Main" [ref=f3e11]:
+      - paragraph [ref=f3e12]: Manage
+      - list [ref=f3e13]:
+        - listitem [ref=f3e14]:
+          - link "Dashboard" [ref=f3e15] [cursor=pointer]:
+            - /url: /admin
+        - listitem [ref=f3e19]:
+          - link "Applications 13 pending" [ref=f3e20] [cursor=pointer]:
+            - /url: /admin/applications
+            - generic [ref=f3e23]: Applications
+            - generic "13 pending" [ref=f3e24]: "13"
+        - listitem [ref=f3e25]:
+          - link "Students" [ref=f3e26] [cursor=pointer]:
+            - /url: /admin/students
+    - paragraph [ref=f3e30]: University Registration · v1.0
+  - generic [ref=f3e31]:
+    - banner [ref=f3e32]:
+      - heading "Applications" [level=1] [ref=f3e33]
+      - generic [ref=f3e34]:
+        - generic [ref=f3e35]:
+          - generic [aria-hidden] [ref=f3e36]: RA
+          - generic [ref=f3e37]:
+            - strong [ref=f3e38]: Registrar Admin
+            - generic [ref=f3e39]: Administrator
+        - button "Sign out" [ref=f3e40] [cursor=pointer]
+    - main [ref=f3e44]:
+      - generic [ref=f3e45]:
+        - generic [ref=f3e46]:
+          - heading "Applications" [level=2] [ref=f3e47]
+          - paragraph [ref=f3e48]: Review new applicants. Approving creates an active student record.
+        - group "Filter applications" [ref=f3e49]:
+          - button "Pending (13)" [pressed] [ref=f3e50] [cursor=pointer]
+          - button "Rejected (3)" [ref=f3e51] [cursor=pointer]
+          - button "All (16)" [ref=f3e52] [cursor=pointer]
+        - region "Applications list" [ref=f3e53]:
+          - table [ref=f3e55]:
+            - rowgroup [ref=f3e56]:
+              - row [ref=f3e57]:
+                - columnheader [ref=f3e58]:
+                  - button "Applicant" [active] [ref=f3e59] [cursor=pointer]
+                - columnheader [ref=f3e62]:
+                  - button "Program" [ref=f3e63] [cursor=pointer]
+                - columnheader [ref=f3e66]:
+                  - button "Applied" [ref=f3e67] [cursor=pointer]
+                - columnheader [ref=f3e70]:
+                  - button "Status" [ref=f3e71] [cursor=pointer]
+                - columnheader "Actions" [ref=f3e74]
+            - rowgroup [ref=f3e76]:
+              - row [ref=f3e148]:
+                - cell [ref=f3e149]:
+                  - strong [ref=f3e150]: Amara Nwosu
+                  - text: amara.nwosu@mail.com
+                - cell "Medicine" [ref=f3e151]
+                - cell "Oct 1, 2026" [ref=f3e152]
+                - cell "Pending" [ref=f3e153]
+                - cell [ref=f3e155]:
+                  - generic [ref=f3e156]:
+                    - button "Approve Amara Nwosu" [ref=f3e157] [cursor=pointer]: Approve
+                    - button "Reject Amara Nwosu" [ref=f3e158] [cursor=pointer]: Reject
+              - row [ref=f3e159]:
+                - cell [ref=f3e160]:
+                  - strong [ref=f3e161]: Ben Fischer
+                  - text: ben.fischer@mail.com
+                - cell "Law" [ref=f3e162]
+                - cell "Oct 2, 2026" [ref=f3e163]
+                - cell "Pending" [ref=f3e164]
+                - cell [ref=f3e166]:
+                  - generic [ref=f3e167]:
+                    - button "Approve Ben Fischer" [ref=f3e168] [cursor=pointer]: Approve
+                    - button "Reject Ben Fischer" [ref=f3e169] [cursor=pointer]: Reject
+              - row [ref=f3e170]:
+                - cell [ref=f3e171]:
+                  - strong [ref=f3e172]: Carla Mendes
+                  - text: carla.mendes@mail.com
+                - cell "Business Admin" [ref=f3e173]
+                - cell "Oct 3, 2026" [ref=f3e174]
+                - cell "Pending" [ref=f3e175]
+                - cell [ref=f3e177]:
+                  - generic [ref=f3e178]:
+                    - button "Approve Carla Mendes" [ref=f3e179] [cursor=pointer]: Approve
+                    - button "Reject Carla Mendes" [ref=f3e180] [cursor=pointer]: Reject
+              - row [ref=f3e181]:
+                - cell [ref=f3e182]:
+                  - strong [ref=f3e183]: Dev Patel
+                  - text: dev.patel@mail.com
+                - cell "Computer Science" [ref=f3e184]
+                - cell "Oct 4, 2026" [ref=f3e185]
+                - cell "Pending" [ref=f3e186]
+                - cell [ref=f3e188]:
+                  - generic [ref=f3e189]:
+                    - button "Approve Dev Patel" [ref=f3e190] [cursor=pointer]: Approve
+                    - button "Reject Dev Patel" [ref=f3e191] [cursor=pointer]: Reject
+              - row [ref=f3e192]:
+                - cell [ref=f3e193]:
+                  - strong [ref=f3e194]: Elena Volkova
+                  - text: elena.volkova@mail.com
+                - cell "Architecture" [ref=f3e195]
+                - cell "Oct 5, 2026" [ref=f3e196]
+                - cell "Pending" [ref=f3e197]
+                - cell [ref=f3e199]:
+                  - generic [ref=f3e200]:
+                    - button "Approve Elena Volkova" [ref=f3e201] [cursor=pointer]: Approve
+                    - button "Reject Elena Volkova" [ref=f3e202] [cursor=pointer]: Reject
+          - generic [ref=f3e132]:
+            - paragraph [ref=f3e133]:
+              - text: Showing
+              - strong [ref=f3e134]: 1–5
+              - text: of
+              - strong [ref=f3e135]: "13"
+            - generic [ref=f3e136]:
+              - text: Rows per page
+              - combobox "Rows per page" [ref=f3e137]:
+                - option "5" [selected]
+                - option "10"
+                - option "25"
+            - navigation "Pagination" [ref=f3e138]:
+              - button "Previous page" [disabled] [ref=f3e139]
+              - button "Page 1" [ref=f3e142]: "1"
+              - button "Page 2" [ref=f3e143] [cursor=pointer]: "2"
+              - button "Page 3" [ref=f3e144] [cursor=pointer]: "3"
+              - button "Next page" [ref=f3e145] [cursor=pointer]
