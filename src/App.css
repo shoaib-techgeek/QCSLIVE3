@@ -59,6 +59,22 @@
   list-style: none;
 }
 
+/* Each card spans 4 shared row tracks (header, meta, attendance, footer) so
+   sections line up across cards in the same row and heights stay equal. */
+.grid > li {
+  display: grid;
+  grid-row: span 4;
+  grid-template-rows: subgrid;
+  row-gap: 16px;
+}
+
+.grid > li > .student-card {
+  display: grid;
+  grid-row: 1 / -1;
+  grid-template-rows: subgrid;
+  row-gap: 16px;
+}
+
 .empty {
   padding: 48px 16px;
   text-align: center;

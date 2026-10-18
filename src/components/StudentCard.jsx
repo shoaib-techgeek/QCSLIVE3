@@ -87,6 +87,7 @@ export default function StudentCard({
         )}
       </dl>
 
+      {!hasAttendance && <div aria-hidden="true" />}
       {hasAttendance && (
         <div className="student-card__attendance">
           <div className="student-card__attendance-label">

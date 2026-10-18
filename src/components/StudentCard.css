@@ -148,7 +148,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  margin-top: auto;
+  align-self: end;
 }
 
 .student-card__email {
