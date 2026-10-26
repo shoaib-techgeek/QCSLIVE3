@@ -1,3 +1,0 @@
-Requirement ID,Requirement summary,Module,Priority,Implementation link,Unit test link,Integration test link,E2E/contract test link,Status,Owner,Notes
-FR-001,Example: customer can view own orders,Identity and Orders,Must,TODO,TODO,TODO,TODO,Not started,,
-NFR-001,Example: API latency target is defined and tested,Scale hardening,Must,TODO,TODO,TODO,TODO,Not started,,

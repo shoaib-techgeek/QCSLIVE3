@@ -1,0 +1,36 @@
+/* Seller center + admin console shell: sidebar on desktop, slide-over on mobile. */
+.console { display: grid; min-height: 100vh; grid-template-columns: minmax(0, 1fr); }
+.console-side {
+  position: fixed; inset: 0 auto 0 0; z-index: 40; width: min(84vw, 272px); display: flex; flex-direction: column; gap: 0.25rem;
+  padding: 1rem 0.75rem; background: var(--brand); color: #fff; transform: translateX(-100%); transition: transform var(--dur) var(--ease);
+}
+.console-side[data-open='true'] { transform: none; box-shadow: var(--shadow-lg); }
+.console-scrim { position: fixed; inset: 0; z-index: 30; background: var(--overlay); border: 0; }
+.console-brand { display: flex; align-items: center; gap: 0.6rem; padding: 0.5rem 0.75rem 1rem; color: #fff; text-decoration: none; font-family: var(--font-display); font-weight: 700; font-size: 1.2rem; }
+.console-brand:hover { color: #fff; }
+.console-brand small { display: block; font-family: var(--font-body); font-weight: 500; font-size: 0.75rem; opacity: 0.75; }
+.console-nav { display: grid; gap: 2px; }
+.console-link {
+  display: flex; align-items: center; gap: 0.75rem; min-height: var(--tap); padding: 0 0.75rem; border-radius: 12px;
+  color: rgba(255, 255, 255, 0.82); text-decoration: none; font-weight: 500;
+}
+.console-link:hover { background: rgba(255, 255, 255, 0.1); color: #fff; }
+.console-link.active { background: rgba(255, 255, 255, 0.18); color: #fff; font-weight: 650; }
+.console-side :focus-visible { outline-color: #fff; }
+.console-side-foot { margin-top: auto; padding: 0.5rem 0.75rem; font-size: 0.85rem; color: rgba(255, 255, 255, 0.7); }
+
+.console-top {
+  position: sticky; top: 0; z-index: 20; display: flex; align-items: center; gap: 0.75rem; min-height: 64px; padding: 0.5rem 1rem;
+  background: var(--surface); border-bottom: 1px solid var(--line);
+}
+.console-top .spacer { flex: 1; }
+.console-menu { display: inline-grid; }
+.console-content { padding: 1.5rem 1rem 4rem; width: min(100%, 1280px); margin-inline: auto; }
+.console .theme-toggle { color: var(--ink); }
+
+@media (min-width: 960px) {
+  .console { grid-template-columns: 264px minmax(0, 1fr); }
+  .console-side { position: sticky; top: 0; height: 100vh; width: auto; transform: none; box-shadow: none; }
+  .console-scrim, .console-menu { display: none; }
+  .console-content { padding: 2rem 2rem 4rem; }
+}

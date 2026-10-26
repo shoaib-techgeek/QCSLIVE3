@@ -1,0 +1,195 @@
+- generic [ref=e2]:
+  - link "Skip to content" [ref=e3] [cursor=pointer]:
+    - /url: "#main"
+  - banner [ref=e4]:
+    - generic [ref=e5]:
+      - link "QCS Live" [ref=e6] [cursor=pointer]:
+        - /url: /
+      - navigation "Primary" [ref=e14]:
+        - link "Best-Selling Items" [ref=e15] [cursor=pointer]:
+          - /url: /?sort=best
+        - link "5-Star Rated" [ref=e18] [cursor=pointer]:
+          - /url: /?sort=rated
+        - link "New In" [ref=e21] [cursor=pointer]:
+          - /url: /?sort=new
+        - button "Categories" [ref=e22] [cursor=pointer]
+      - search [ref=e25]:
+        - searchbox "Search products" [ref=e26]
+        - button "Search" [ref=e27] [cursor=pointer]
+      - generic [ref=e30]:
+        - button "Support" [ref=e31] [cursor=pointer]
+        - group "Colour theme" [ref=e34]:
+          - button "Match system theme" [pressed] [ref=e35] [cursor=pointer]
+          - button "Light theme" [ref=e38] [cursor=pointer]
+          - button "Dark theme" [ref=e41] [cursor=pointer]
+        - button "English" [ref=e44] [cursor=pointer]
+        - button "Cart, 0 items" [ref=e47] [cursor=pointer]:
+          - generic [ref=e50]: "0"
+  - main [ref=e51]:
+    - generic [ref=e52]:
+      - generic [ref=e53]:
+        - generic [ref=e54]:
+          - heading "Design system" [level=1] [ref=e55]
+          - paragraph [ref=e56]: Tokens and components shared by the storefront, seller center and admin.
+        - group "Colour theme" [ref=e57]:
+          - button "Match system theme" [pressed] [ref=e58] [cursor=pointer]
+          - button "Light theme" [ref=e61] [cursor=pointer]
+          - button "Dark theme" [ref=e64] [cursor=pointer]
+      - region [ref=e67]:
+        - heading "Colour" [level=2] [ref=e68]
+        - generic [ref=e69]:
+          - generic [ref=e70]: primary
+          - generic [ref=e72]: brand
+          - generic [ref=e74]: mango
+          - generic [ref=e76]: teal
+          - generic [ref=e78]: coral
+          - generic [ref=e80]: success
+          - generic [ref=e82]: warning
+          - generic [ref=e84]: error
+          - generic [ref=e86]: info
+      - region [ref=e88]:
+        - heading "Buttons" [level=2] [ref=e89]
+        - generic [ref=e90]:
+          - button "Save changes" [ref=e91] [cursor=pointer]
+          - button "Add to cart" [ref=e92] [cursor=pointer]
+          - button "Cancel" [ref=e93] [cursor=pointer]
+          - button "Delete product" [ref=e94] [cursor=pointer]
+          - button "Small" [ref=e95] [cursor=pointer]
+          - button "Publish" [ref=e96] [cursor=pointer]
+          - button "Disabled" [disabled] [ref=e97]
+      - region [ref=e98]:
+        - heading "Badges" [level=2] [ref=e99]
+        - generic [ref=e100]:
+          - generic [ref=e101]: Active
+          - generic [ref=e102]: Delivered
+          - generic [ref=e103]: Pending review
+          - generic [ref=e104]: Rejected
+          - generic [ref=e105]: In transit
+          - generic [ref=e106]: Draft
+      - region [ref=e107]:
+        - heading "Form fields" [level=2] [ref=e108]
+        - generic [ref=e109]:
+          - generic [ref=e110]:
+            - generic [ref=e111]: Product title
+            - textbox "Product title" [ref=e113]
+            - paragraph [ref=e114]: Up to 120 characters.
+          - generic [ref=e115]:
+            - generic [ref=e116]: Category
+            - combobox "Category" [ref=e118]:
+              - option "Fashion" [selected]
+              - option "Electronics"
+          - generic [ref=e119]:
+            - generic [ref=e120]: Description
+            - textbox "Description" [ref=e122]
+          - generic [ref=e123]:
+            - generic [ref=e124]: SKU
+            - textbox "SKU" [invalid] [ref=e126]: SKU-1
+            - paragraph [ref=e127]: That SKU is already used in your store.
+      - region [ref=e128]:
+        - heading "Tabs" [level=2] [ref=e129]
+        - tablist "Example" [ref=e130]:
+          - tab "Details" [selected] [ref=e131] [cursor=pointer]
+          - tab "Variants" [ref=e132] [cursor=pointer]
+        - tabpanel "Details" [ref=e133]:
+          - paragraph [ref=e134]: Details panel
+      - region [ref=e135]:
+        - heading "Table" [level=2] [ref=e136]
+        - region "Recent orders" [ref=e137]:
+          - table [ref=e138]:
+            - caption [ref=e139]: Recent orders
+            - rowgroup [ref=e140]:
+              - row [ref=e141]:
+                - columnheader "Order" [ref=e142]
+                - columnheader "Buyer" [ref=e143]
+                - columnheader "Status" [ref=e144]
+                - columnheader "Total" [ref=e145]
+            - rowgroup [ref=e146]:
+              - row [ref=e147]:
+                - cell "A-1001" [ref=e148]
+                - cell "Ayesha K." [ref=e149]
+                - cell "Shipped" [ref=e150]
+                - cell "Rs 4,599" [ref=e152]
+              - row [ref=e153]:
+                - cell "A-1002" [ref=e154]
+                - cell "Bilal R." [ref=e155]
+                - cell "Pending" [ref=e156]
+                - cell "Rs 1,299" [ref=e158]
+      - region [ref=e159]:
+        - heading "Product cards" [level=2] [ref=e160]
+        - generic [ref=e161]:
+          - article [ref=e162]:
+            - generic [ref=e165]: 30% off
+            - generic [ref=e166]:
+              - heading [level=3] [ref=e167]:
+                - link "Linen shirt, relaxed fit" [ref=e168] [cursor=pointer]:
+                  - /url: /design
+              - generic [ref=e169]:
+                - generic [ref=e170]: Rs 3,499
+                - generic [ref=e171]:
+                  - generic [ref=e172]: Was
+                  - text: Rs 4,999
+              - generic [ref=e173]:
+                - text: "4.6"
+                - generic [ref=e176]: out of 5
+          - article [ref=e177]:
+            - generic [ref=e180]: New
+            - generic [ref=e181]:
+              - heading [level=3] [ref=e182]:
+                - link "Wireless earbuds with charging case" [ref=e183] [cursor=pointer]:
+                  - /url: /design
+              - generic [ref=e184]: Rs 2,899
+              - generic [ref=e186]:
+                - text: "4.2"
+                - generic [ref=e189]: out of 5
+          - article [ref=e190]:
+            - generic [ref=e193]:
+              - heading [level=3] [ref=e194]:
+                - link "Ceramic pour-over coffee set" [ref=e195] [cursor=pointer]:
+                  - /url: /design
+              - generic [ref=e196]: Rs 1,599
+      - region [ref=e198]:
+        - heading "Stats and loading" [level=2] [ref=e199]
+        - generic [ref=e200]:
+          - generic [ref=e201]:
+            - paragraph [ref=e202]: Sales
+            - paragraph [ref=e203]: Rs 1.2M
+            - paragraph [ref=e204]: Up 12% vs last week
+          - generic [ref=e205]:
+            - paragraph [ref=e206]: Returns
+            - paragraph [ref=e207]: "14"
+            - paragraph [ref=e208]: Down 3% vs last week
+      - region [ref=e213]:
+        - heading "Feedback" [level=2] [ref=e214]
+        - generic [ref=e215]:
+          - button "Success toast" [ref=e216] [cursor=pointer]
+          - button "Error toast" [ref=e217] [cursor=pointer]
+          - button "Open dialog" [ref=e218] [cursor=pointer]
+        - generic [ref=e219]:
+          - heading "No orders yet" [level=2] [ref=e224]
+          - paragraph [ref=e225]: Orders appear here as soon as a buyer checks out.
+          - link "Browse the store" [ref=e226] [cursor=pointer]:
+            - /url: /
+      - region [ref=e227]:
+        - heading "Icons" [level=2] [ref=e228]
+        - generic [ref=e229]:
+          - generic "menu" [ref=e230]
+          - generic "close" [ref=e233]
+          - generic "sun" [ref=e236]
+          - generic "moon" [ref=e239]
+          - generic "monitor" [ref=e242]
+          - generic "home" [ref=e245]
+          - generic "box" [ref=e248]
+          - generic "orders" [ref=e251]
+          - generic "chart" [ref=e254]
+          - generic "users" [ref=e257]
+          - generic "store" [ref=e260]
+          - generic "settings" [ref=e263]
+          - generic "shield" [ref=e266]
+          - generic "tag" [ref=e269]
+          - generic "star" [ref=e272]
+          - generic "cart" [ref=e275]
+          - generic "search" [ref=e278]
+          - generic "check" [ref=e281]
+          - generic "alert" [ref=e284]
+          - generic "plus" [ref=e287]
+          - generic "logout" [ref=e290]
