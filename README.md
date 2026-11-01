@@ -1,6 +1,21 @@
-# QCS Live Marketplace
+# QCS Store
 
-Multi-vendor e-commerce marketplace. React + Vite storefront (this folder) and a Node/Fastify + MySQL API in [`backend/`](backend/README.md). Development follows the module guide in `Marketplace_Module_Wise_Development_Guide.md`.
+Multi-vendor, deal-first e-commerce marketplace (Temu-style; see [docs/PRODUCT.md](docs/PRODUCT.md)). React + Vite storefront (this folder) and a Node/Fastify + MySQL API in [`backend/`](backend/README.md). Start with a reliable, secure, observable modular monolith; scale on measured bottlenecks, not guesses.
+
+## Documentation map
+| File | Purpose |
+|---|---|
+| [docs/PRODUCT.md](docs/PRODUCT.md) | What "Temu-style" means, release phases, MVP scope, open business decisions |
+| [CLAUDE.md](CLAUDE.md) | Rules every contributor and AI agent must follow |
+| [docs/adr/](docs/adr/) | Architecture decisions (stack, modular monolith, API-first backend) |
+| [modules/README.md](modules/README.md) | Ordered module guides, status of each, definition of done |
+| [backend/README.md](backend/README.md) | Backend setup, commands, identity API |
+| [CHANGELOG.md](CHANGELOG.md) | What changed |
+
+## Working with Claude Code
+1. Read `CLAUDE.md` and the target `modules/NN-*.md` first.
+2. One module, one step per task. Ask for the design first, approve, then implement.
+3. A module is Done only when its checklist passes and its status is updated in `modules/README.md`.
 
 ## Run locally
 1. Start MySQL (XAMPP) with databases `marketplace_dev` and `marketplace_test`.
@@ -17,8 +32,8 @@ Created by `npm run seed:dev`; it refuses to run in production.
 Email verification is currently **disabled** (`REQUIRE_EMAIL_VERIFICATION=false` in `backend/.env`): new accounts are active immediately and can sign in right after registering. Set it to `true` to require the emailed link (with `MAIL_DRIVER=log` it is printed in the backend console). The code default is `true`.
 
 ## Tests
-- Frontend: `npm test` (Vitest + Testing Library)
-- Backend: `cd backend && npm test` (unit + integration against `marketplace_test`)
+- Frontend: `npm run lint && npm test && npm run build`
+- Backend: `cd backend && npm run typecheck && npm test` (unit + integration against `marketplace_test`)
 
 ## Design system
 Idea: a **market stall**. A striped, scalloped awning hangs under the header and across the sign-in brand panel; everything else stays quiet so that is the memorable element.
