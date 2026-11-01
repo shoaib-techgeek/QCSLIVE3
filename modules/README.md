@@ -10,9 +10,9 @@ Phases and exit checks are in [docs/PRODUCT.md](../docs/PRODUCT.md).
 
 | # | Module | Status | Notes |
 |---|---|---|---|
-| 00 | [Project setup](00-project-setup.md) | Partial | App skeleton, migrations, health endpoints, tests exist. Missing: CI pipeline, pre-commit hooks, architecture tests, `.github`, deploy, observability |
+| 00 | [Project setup](00-project-setup.md) | Partial | App skeleton, migrations, health endpoints, tests exist. CI workflow added (`.github/workflows/ci.yml`, unverified until first run). Architecture tests added. Missing: pre-commit hooks, deploy, observability |
 | 01 | [Architecture and scalability](01-architecture-and-scalability.md) | Reference | Playbook, not built. Use when a metric demands it |
-| 02 | [Shared kernel](02-shared-kernel.md) | Partial | `AppError`, audit, `Mailer`/`LogMailer` exist. Missing: Money, Clock, outbox, pagination |
+| 02 | [Shared kernel](02-shared-kernel.md) | Partial | `AppError`, audit, `Mailer`/`LogMailer` exist. `Money`, `Clock`, outbox table, helpers and relay worker added. Missing: pagination, idempotency middleware, settings service |
 | 03 | [Identity and auth](03-identity-auth.md) | Partial | Email+password, sessions, reset, lockout, `/me`, RBAC guard done. **Diverges from guide**: no OTP, social login, 2FA, addresses |
 | 04 | [Seller onboarding](04-seller-onboarding.md) | Not started | Seller shell UI exists, no backend |
 | 05 | [Catalog](05-catalog.md) | Not started | |

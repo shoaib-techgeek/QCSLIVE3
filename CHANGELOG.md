@@ -1,6 +1,9 @@
 # Changelog
 
 ## Unreleased
+- `docs/openapi.yaml` for health and identity endpoints; architecture tests (shared never imports modules, modules never import each other, routes and spec must match).
+- Outbox relay: `EventBus`, `relayOnce` (retry, per-consumer dedupe via `processed_events`), `startRelay` wired into the server.
+- P0 foundation: `Money` (minor units, half-even percentage, exact allocate), `Clock`/`FixedClock`, transactional outbox table and helpers, `PaymentGateway` interface with `FakePaymentGateway`, GitHub Actions CI.
 - Docs: removed duplicate guides and the stale blueprint README; rewrote CLAUDE.md for the real stack; added ADR-0001/0002 and `modules/README.md` with module status.
 - Design system: tokens with light/dark/system theme, UI kit (Button, Badge, Field select/textarea, Tabs, Modal, Toast, Skeleton, EmptyState, DataTable, StatCard, ProductCard), `formatMoney` helper, dev-only gallery at `/design`.
 - Seller center (`/seller`) and admin console (`/admin`) shells with a responsive sidebar, gated by `seller:access` / `admin:access` (permissions to be added by the backend).

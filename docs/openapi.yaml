@@ -1,0 +1,154 @@
+openapi: 3.1.0
+info:
+  title: QCS Store API
+  version: 1.0.0
+  description: |
+    Headless JSON API (ADR-0003). Contract first: update this file before changing a route.
+    Browsers authenticate with the HttpOnly `sid` cookie. Every mutating request must send
+    `X-Requested-With: XMLHttpRequest` (CSRF guard).
+servers:
+  - url: http://localhost:4000
+paths:
+  /health/live:
+    get:
+      summary: Liveness
+      security: []
+      responses:
+        '200': { description: Process is up, content: { application/json: { schema: { $ref: '#/components/schemas/Health' } } } }
+  /health/ready:
+    get:
+      summary: Readiness (database reachable)
+      security: []
+      responses:
+        '200': { description: Ready, content: { application/json: { schema: { $ref: '#/components/schemas/Health' } } } }
+        '503': { description: Database down, content: { application/json: { schema: { $ref: '#/components/schemas/Health' } } } }
+  /api/v1/auth/register:
+    post:
+      summary: Create an account
+      description: With email verification on, always 202 (no account enumeration). Off, 201 and the account is active; a duplicate email is 409.
+      security: []
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/Register' } } } }
+      responses:
+        '201': { description: Account created, content: { application/json: { schema: { $ref: '#/components/schemas/RegisterResult' } } } }
+        '202': { description: Verification email sent if registrable, content: { application/json: { schema: { $ref: '#/components/schemas/RegisterResult' } } } }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '409': { $ref: '#/components/responses/Error' }
+        '429': { $ref: '#/components/responses/Error' }
+  /api/v1/auth/verify-email:
+    post:
+      summary: Confirm email with a single-use token (24 h)
+      security: []
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/TokenBody' } } } }
+      responses:
+        '204': { description: Verified }
+        '400': { $ref: '#/components/responses/ValidationError' }
+  /api/v1/auth/login:
+    post:
+      summary: Sign in; sets the `sid` cookie (7-day server-side session)
+      description: Five failed attempts lock the account for 15 minutes.
+      security: []
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/Login' } } } }
+      responses:
+        '200': { description: Signed in, content: { application/json: { schema: { $ref: '#/components/schemas/AccountEnvelope' } } } }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Error' }
+        '423': { $ref: '#/components/responses/Error' }
+        '429': { $ref: '#/components/responses/Error' }
+  /api/v1/auth/logout:
+    post:
+      summary: Revoke the current session
+      responses:
+        '204': { description: Signed out }
+  /api/v1/auth/forgot-password:
+    post:
+      summary: Request a reset link (always 202; token valid 1 h, newest wins)
+      security: []
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/ForgotPassword' } } } }
+      responses:
+        '202': { description: Accepted, content: { application/json: { schema: { $ref: '#/components/schemas/Message' } } } }
+        '400': { $ref: '#/components/responses/ValidationError' }
+  /api/v1/auth/reset-password:
+    post:
+      summary: Set a new password with a single-use token; signs out all devices
+      security: []
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/ResetPassword' } } } }
+      responses:
+        '204': { description: Password reset }
+        '400': { $ref: '#/components/responses/ValidationError' }
+  /api/v1/auth/change-password:
+    post:
+      summary: Change password; signs out other devices
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/ChangePassword' } } } }
+      responses:
+        '204': { description: Changed }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Error' }
+  /api/v1/me:
+    get:
+      summary: Current account (permission account:read)
+      responses:
+        '200': { description: Account, content: { application/json: { schema: { $ref: '#/components/schemas/AccountEnvelope' } } } }
+        '401': { $ref: '#/components/responses/Error' }
+        '403': { $ref: '#/components/responses/Error' }
+    patch:
+      summary: Update profile (permission account:update)
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/UpdateProfile' } } } }
+      responses:
+        '200': { description: Updated, content: { application/json: { schema: { $ref: '#/components/schemas/AccountEnvelope' } } } }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Error' }
+        '403': { $ref: '#/components/responses/Error' }
+security:
+  - sessionCookie: []
+components:
+  securitySchemes:
+    sessionCookie: { type: apiKey, in: cookie, name: sid }
+  responses:
+    Error: { description: Error, content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } } }
+    ValidationError: { description: Validation failed, content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } } }
+  schemas:
+    Health: { type: object, properties: { status: { type: string }, checks: { type: object } } }
+    Message: { type: object, properties: { message: { type: string } } }
+    Error:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: object
+          required: [code, message, requestId]
+          properties:
+            code: { type: string, example: VALIDATION_ERROR }
+            message: { type: string }
+            requestId: { type: string }
+            details: { type: array, items: { type: object } }
+    Register:
+      type: object
+      required: [email, password]
+      properties:
+        email: { type: string, format: email, maxLength: 254 }
+        password: { type: string }
+        fullName: { type: string, minLength: 1, maxLength: 120 }
+    RegisterResult:
+      type: object
+      properties: { verificationRequired: { type: boolean }, message: { type: string } }
+    TokenBody: { type: object, required: [token], properties: { token: { type: string, minLength: 20, maxLength: 200 } } }
+    Login: { type: object, required: [email, password], properties: { email: { type: string, format: email }, password: { type: string, maxLength: 128 } } }
+    ForgotPassword: { type: object, required: [email], properties: { email: { type: string, format: email } } }
+    ResetPassword: { type: object, required: [token, password], properties: { token: { type: string }, password: { type: string } } }
+    ChangePassword: { type: object, required: [currentPassword, newPassword], properties: { currentPassword: { type: string }, newPassword: { type: string } } }
+    UpdateProfile:
+      type: object
+      additionalProperties: false
+      properties:
+        fullName: { type: [string, 'null'], maxLength: 120 }
+        phone: { type: [string, 'null'], description: 7-20 chars; digits, space, ( ) - and leading + }
+    AccountEnvelope: { type: object, properties: { account: { $ref: '#/components/schemas/Account' } } }
+    Account:
+      type: object
+      description: Shape is defined by AuthService.accountView; keep in sync.
+      properties:
+        id: { type: [string, integer] }
+        email: { type: string }
+        fullName: { type: [string, 'null'] }
+        phone: { type: [string, 'null'] }
+        permissions: { type: array, items: { type: string } }
