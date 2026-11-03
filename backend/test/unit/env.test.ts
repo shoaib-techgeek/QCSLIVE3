@@ -35,7 +35,7 @@ describe('loadEnv', () => {
 
   it('requires a DB password in production', () => {
     expect(() => loadEnv({ ...base, NODE_ENV: 'production' })).toThrow(/DB_PASSWORD/);
-    expect(() => loadEnv({ ...base, NODE_ENV: 'production', DB_PASSWORD: 'x', MAIL_DRIVER: 'memory' })).not.toThrow();
+    expect(() => loadEnv({ ...base, NODE_ENV: 'production', DB_PASSWORD: 'x', MAIL_DRIVER: 'memory', PII_ENCRYPTION_KEY: 'k', STORAGE_DRIVER: 's3' })).not.toThrow();
   });
 
   it('refuses the log mail driver in production (it would write links to logs)', () => {
@@ -48,5 +48,22 @@ describe('loadEnv', () => {
     } catch (e) {
       expect((e as Error).message).not.toContain('super-secret');
     }
+  });
+});
+
+describe('loadEnv storage and encryption', () => {
+  const prod = { ...base, NODE_ENV: 'production', DB_PASSWORD: 'x', MAIL_DRIVER: 'memory' };
+  it('requires PII_ENCRYPTION_KEY in production', () => {
+    expect(() => loadEnv({ ...prod })).toThrow(/PII_ENCRYPTION_KEY/);
+  });
+  it('refuses local or memory storage in production', () => {
+    expect(() => loadEnv({ ...prod, PII_ENCRYPTION_KEY: 'k', STORAGE_DRIVER: 'local' })).toThrow(/STORAGE_DRIVER/);
+    expect(() => loadEnv({ ...prod, PII_ENCRYPTION_KEY: 'k', STORAGE_DRIVER: 'memory' })).toThrow(/STORAGE_DRIVER/);
+  });
+  it('treats an empty PII_ENCRYPTION_KEY as unset', () => {
+    expect(loadEnv({ ...base, PII_ENCRYPTION_KEY: '' }).PII_ENCRYPTION_KEY).toBeUndefined();
+  });
+  it('defaults to local storage in development', () => {
+    expect(loadEnv({ ...base }).STORAGE_DRIVER).toBe('local');
   });
 });

@@ -14,7 +14,7 @@ Phases and exit checks are in [docs/PRODUCT.md](../docs/PRODUCT.md).
 | 01 | [Architecture and scalability](01-architecture-and-scalability.md) | Reference | Playbook, not built. Use when a metric demands it |
 | 02 | [Shared kernel](02-shared-kernel.md) | Partial | `AppError`, audit, `Mailer`/`LogMailer` exist. `Money`, `Clock`, outbox table, helpers and relay worker added. Missing: pagination, idempotency middleware, settings service |
 | 03 | [Identity and auth](03-identity-auth.md) | Partial | Email+password, sessions, reset, lockout, `/me`, RBAC guard done. **Diverges from guide**: no OTP, social login, 2FA, addresses |
-| 04 | [Seller onboarding](04-seller-onboarding.md) | Not started | Seller shell UI exists, no backend |
+| 04 | [Seller onboarding](04-seller-onboarding.md) | In progress | Seller profile, KYC documents/details, submit, admin review and decisions done (P1.1-P1.3, backend + UI). Missing: bank accounts, staff, public store page, production file storage |
 | 05 | [Catalog](05-catalog.md) | Not started | |
 | 06 | [Inventory](06-inventory.md) | Not started | |
 | 07 | [Search](07-search.md) | Not started | |

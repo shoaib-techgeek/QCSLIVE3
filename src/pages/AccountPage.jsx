@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { changePassword, updateMe } from '../api/auth.js'
+import { Link } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext.jsx'
 import Field from '../components/Field.jsx'
 import { ErrorMessage, SuccessMessage } from '../components/FormMessage.jsx'
@@ -98,6 +99,11 @@ export default function AccountPage() {
           <p className="muted">{account.fullName ? `Welcome back, ${account.fullName.split(' ')[0]}.` : 'Welcome back.'}</p>
         </div>
       </div>
+      <p>
+        {account.permissions?.includes('seller:access')
+          ? <Link to="/seller">Open seller center</Link>
+          : <Link to="/seller/onboarding">Sell on QCS Store</Link>}
+      </p>
       <div className="account-grid">
         <ProfileForm />
         <PasswordForm />

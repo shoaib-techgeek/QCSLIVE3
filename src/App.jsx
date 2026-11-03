@@ -14,6 +14,9 @@ import RegisterPage from './pages/RegisterPage.jsx'
 import ResetPasswordPage from './pages/ResetPasswordPage.jsx'
 import VerifyEmailPage from './pages/VerifyEmailPage.jsx'
 import AdminDashboardPage from './pages/admin/AdminDashboardPage.jsx'
+import KycQueuePage from './pages/admin/KycQueuePage.jsx'
+import KycReviewPage from './pages/admin/KycReviewPage.jsx'
+import OnboardingPage from './pages/seller/OnboardingPage.jsx'
 import SellerDashboardPage from './pages/seller/SellerDashboardPage.jsx'
 import { ToastProvider } from './ui/Toast.jsx'
 
@@ -22,6 +25,7 @@ const SELLER_NAV = [
 ]
 const ADMIN_NAV = [
   { to: '/admin', label: 'Overview', icon: 'home', end: true },
+  { to: '/admin/kyc', label: 'Seller verification', icon: 'shield' },
 ]
 
 export default function App() {
@@ -39,6 +43,7 @@ export default function App() {
             {import.meta.env.DEV && <Route path="design" element={<DesignPage />} />}
             <Route element={<RequireAuth />}>
               <Route path="account" element={<AccountPage />} />
+              <Route path="seller/onboarding" element={<OnboardingPage />} />
             </Route>
             <Route path="*" element={<NotFoundPage />} />
           </Route>
@@ -51,6 +56,10 @@ export default function App() {
             <Route element={<RequirePermission permission="admin:access" />}>
               <Route path="admin" element={<ConsoleLayout title="Admin console" nav={ADMIN_NAV} />}>
                 <Route index element={<AdminDashboardPage />} />
+                <Route element={<RequirePermission permission="kyc:review" />}>
+                  <Route path="kyc" element={<KycQueuePage />} />
+                  <Route path="kyc/:sellerId" element={<KycReviewPage />} />
+                </Route>
               </Route>
             </Route>
           </Route>

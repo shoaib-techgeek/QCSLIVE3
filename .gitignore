@@ -22,3 +22,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Local file storage (KYC documents, uploads): never commit
+backend/storage/

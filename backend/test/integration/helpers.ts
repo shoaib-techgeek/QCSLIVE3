@@ -4,6 +4,7 @@ import { buildApp } from '../../src/app.js';
 import { loadEnv, type Env } from '../../src/config/env.js';
 import { createDb } from '../../src/db/knex.js';
 import { MemoryMailer } from '../../src/shared/mailer.js';
+import { MemoryFileStorage } from '../../src/shared/file-storage.js';
 
 export function testEnv(overrides: NodeJS.ProcessEnv = {}): Env {
   return loadEnv({
@@ -15,6 +16,8 @@ export function testEnv(overrides: NodeJS.ProcessEnv = {}): Env {
     DB_TEST_NAME: process.env.DB_TEST_NAME ?? 'marketplace_test',
     AUTH_RATE_LIMIT_MAX: '1000',
     MAIL_DRIVER: 'memory',
+    STORAGE_DRIVER: 'memory',
+    PII_ENCRYPTION_KEY: Buffer.alloc(32, 7).toString('base64'),
     ...overrides,
   });
 }
@@ -23,6 +26,7 @@ export interface TestContext {
   app: FastifyInstance;
   db: Knex;
   mailer: MemoryMailer;
+  storage: MemoryFileStorage;
 }
 
 /** Builds the app against the test database with all migrations applied. */
@@ -31,9 +35,10 @@ export async function startTestApp(envOverrides: NodeJS.ProcessEnv = {}): Promis
   const db = createDb(env);
   await db.migrate.latest();
   const mailer = new MemoryMailer();
-  const app = await buildApp({ env, db, mailer });
+  const storage = new MemoryFileStorage();
+  const app = await buildApp({ env, db, mailer, storage });
   await app.ready();
-  return { app, db, mailer };
+  return { app, db, mailer, storage };
 }
 
 export async function stopTestApp({ app, db }: TestContext): Promise<void> {
@@ -43,5 +48,5 @@ export async function stopTestApp({ app, db }: TestContext): Promise<void> {
 
 /** Clears identity data between tests; seeded roles/permissions are kept. */
 export async function resetIdentityData(db: Knex): Promise<void> {
-  for (const t of ['sessions', 'one_time_tokens', 'user_roles', 'users', 'audit_events']) await db(t).delete();
+  for (const t of ['kyc_status_history', 'kyc_pii', 'kyc_documents', 'kyc_applications', 'sellers', 'sessions', 'one_time_tokens', 'user_roles', 'users', 'audit_events']) await db(t).delete();
 }

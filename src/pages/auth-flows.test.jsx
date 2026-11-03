@@ -1,4 +1,4 @@
-import { screen, waitFor } from '@testing-library/react'
+import { screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { ACCOUNT, apiError, mockApi, renderApp } from '../test/utils.jsx'
@@ -221,7 +221,7 @@ describe('account page', () => {
     renderApp('/account')
     const user = userEvent.setup()
     await user.click(await screen.findByRole('button', { name: 'Sign out' }))
-    await waitFor(() => expect(screen.getByRole('link', { name: 'Sign in' })).toBeInTheDocument())
+    await waitFor(() => expect(within(screen.getByRole('banner')).getByRole('link', { name: 'Sign in' })).toBeInTheDocument())
     expect(screen.queryByRole('button', { name: 'Sign out' })).not.toBeInTheDocument()
   })
 

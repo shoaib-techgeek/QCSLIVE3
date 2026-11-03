@@ -98,6 +98,127 @@ paths:
         '400': { $ref: '#/components/responses/ValidationError' }
         '401': { $ref: '#/components/responses/Error' }
         '403': { $ref: '#/components/responses/Error' }
+  /api/v1/seller/profile:
+    post:
+      summary: Create your store (one store per user)
+      description: Status starts as `pending` and KYC as `not_submitted`. Store name 3-60 chars; the slug is derived from it and is permanent.
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/CreateSeller' } } } }
+      responses:
+        '201': { description: Store created, content: { application/json: { schema: { $ref: '#/components/schemas/SellerEnvelope' } } } }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Error' }
+        '409': { description: SELLER_EXISTS or STORE_NAME_TAKEN, content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } } }
+    get:
+      summary: Your store (404 SELLER_NOT_FOUND if none)
+      responses:
+        '200': { description: Store, content: { application/json: { schema: { $ref: '#/components/schemas/SellerEnvelope' } } } }
+        '401': { $ref: '#/components/responses/Error' }
+        '404': { $ref: '#/components/responses/Error' }
+    patch:
+      summary: Update your store description (name, status and KYC status cannot be changed here)
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/UpdateSeller' } } } }
+      responses:
+        '200': { description: Updated, content: { application/json: { schema: { $ref: '#/components/schemas/SellerEnvelope' } } } }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Error' }
+        '404': { $ref: '#/components/responses/Error' }
+  /api/v1/seller/kyc:
+    get:
+      summary: Your verification status, uploaded documents and masked details
+      responses:
+        '200': { description: KYC, content: { application/json: { schema: { $ref: '#/components/schemas/KycEnvelope' } } } }
+        '401': { $ref: '#/components/responses/Error' }
+        '404': { $ref: '#/components/responses/Error' }
+  /api/v1/seller/kyc/documents:
+    post:
+      summary: Upload a verification document (JPG, PNG or PDF, max 5 MB)
+      description: |
+        multipart/form-data. Send the `kind` field **before** the `file` part. File type is detected from content, not from the
+        name. Single-file kinds replace the previous upload; `business_photo` allows up to 4. Only allowed while the application is
+        `not_submitted` or `more_info_required` (otherwise 409 KYC_LOCKED).
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [kind, file]
+              properties:
+                kind: { type: string, enum: [cnic_front, cnic_back, business_registration, business_photo, tax_certificate] }
+                file: { type: string, format: binary }
+      responses:
+        '201': { description: Stored, content: { application/json: { schema: { type: object, properties: { document: { $ref: '#/components/schemas/KycDocument' } } } } } }
+        '400': { description: VALIDATION_ERROR, FILE_TYPE_NOT_ALLOWED or TOO_MANY_FILES, content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } } }
+        '409': { $ref: '#/components/responses/Error' }
+        '413': { description: FILE_TOO_LARGE, content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } } }
+  /api/v1/seller/kyc/documents/{documentId}:
+    delete:
+      summary: Remove one of your uploaded documents (404 for anyone else's)
+      parameters: [{ name: documentId, in: path, required: true, schema: { type: string, format: uuid } }]
+      responses:
+        '204': { description: Removed }
+        '404': { $ref: '#/components/responses/Error' }
+        '409': { $ref: '#/components/responses/Error' }
+  /api/v1/seller/kyc/pii:
+    put:
+      summary: Save CNIC, business address and optional tax number (encrypted at rest)
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/KycPii' } } } }
+      responses:
+        '200': { description: Saved, content: { application/json: { schema: { $ref: '#/components/schemas/KycEnvelope' } } } }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '409': { $ref: '#/components/responses/Error' }
+  /api/v1/seller/kyc/submit:
+    post:
+      summary: Submit the application for review
+      description: Needs cnic_front, cnic_back, business_registration, at least one business_photo and the details. Otherwise 400 KYC_INCOMPLETE listing what is missing.
+      responses:
+        '200': { description: Submitted, content: { application/json: { schema: { $ref: '#/components/schemas/KycEnvelope' } } } }
+        '400': { $ref: '#/components/responses/Error' }
+        '409': { $ref: '#/components/responses/Error' }
+  /api/v1/admin/kyc:
+    get:
+      summary: Review queue (permission kyc:review). Default shows submitted and under_review
+      parameters:
+        - { name: status, in: query, schema: { type: string } }
+        - { name: cursor, in: query, schema: { type: integer } }
+        - { name: limit, in: query, schema: { type: integer, minimum: 1, maximum: 100, default: 25 } }
+      responses:
+        '200': { description: Page, content: { application/json: { schema: { $ref: '#/components/schemas/KycQueue' } } } }
+        '401': { $ref: '#/components/responses/Error' }
+        '403': { $ref: '#/components/responses/Error' }
+  /api/v1/admin/kyc/{sellerId}:
+    get:
+      summary: Full application incl. decrypted details (audited as kyc.pii_viewed)
+      parameters: [{ name: sellerId, in: path, required: true, schema: { type: string, format: uuid } }]
+      responses:
+        '200': { description: Detail, content: { application/json: { schema: { type: object } } } }
+        '403': { $ref: '#/components/responses/Error' }
+        '404': { $ref: '#/components/responses/Error' }
+  /api/v1/admin/kyc/{sellerId}/documents/{documentId}:
+    get:
+      summary: Download a document (audited as kyc.document_viewed; never cached)
+      parameters:
+        - { name: sellerId, in: path, required: true, schema: { type: string, format: uuid } }
+        - { name: documentId, in: path, required: true, schema: { type: string, format: uuid } }
+      responses:
+        '200': { description: File bytes, content: { image/png: {}, image/jpeg: {}, application/pdf: {} } }
+        '403': { $ref: '#/components/responses/Error' }
+        '404': { $ref: '#/components/responses/Error' }
+  /api/v1/admin/kyc/{sellerId}/decision:
+    post:
+      summary: Decide on an application
+      description: |
+        start_review (submitted -> under_review), then approve, approve_with_conditions, reject or request_info.
+        A note is required for everything except start_review and approve. Approval activates the store and grants the seller role.
+        Invalid moves are 409 KYC_INVALID_TRANSITION.
+      parameters: [{ name: sellerId, in: path, required: true, schema: { type: string, format: uuid } }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/KycDecision' } } } }
+      responses:
+        '200': { description: Decided, content: { application/json: { schema: { type: object } } } }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '403': { $ref: '#/components/responses/Error' }
+        '404': { $ref: '#/components/responses/Error' }
+        '409': { $ref: '#/components/responses/Error' }
 security:
   - sessionCookie: []
 components:
@@ -152,3 +273,73 @@ components:
         fullName: { type: [string, 'null'] }
         phone: { type: [string, 'null'] }
         permissions: { type: array, items: { type: string } }
+    CreateSeller:
+      type: object
+      additionalProperties: false
+      required: [storeName]
+      properties:
+        storeName: { type: string, minLength: 3, maxLength: 60 }
+        description: { type: string, maxLength: 1000 }
+    UpdateSeller:
+      type: object
+      additionalProperties: false
+      required: [description]
+      properties: { description: { type: [string, 'null'], maxLength: 1000 } }
+    SellerEnvelope: { type: object, properties: { seller: { $ref: '#/components/schemas/Seller' } } }
+    Seller:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        storeName: { type: string }
+        slug: { type: string }
+        description: { type: [string, 'null'] }
+        status: { type: string, enum: [pending, active, suspended, closed] }
+        kycStatus: { type: string, enum: [not_submitted, submitted, under_review, approved, approved_with_conditions, rejected, more_info_required] }
+        createdAt: { type: string, format: date-time }
+    KycDocument:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        kind: { type: string }
+        mime: { type: string }
+        sizeBytes: { type: integer }
+    KycEnvelope:
+      type: object
+      properties:
+        kyc:
+          type: object
+          properties:
+            status: { type: string }
+            note: { type: [string, 'null'] }
+            documents: { type: array, items: { $ref: '#/components/schemas/KycDocument' } }
+            pii: { type: [object, 'null'], properties: { cnicLast4: { type: string }, hasAddress: { type: boolean }, hasNtn: { type: boolean } } }
+            requiredDocuments: { type: array, items: { type: string } }
+    KycPii:
+      type: object
+      additionalProperties: false
+      required: [cnic, address]
+      properties:
+        cnic: { type: string, description: 13 digits, dashes optional }
+        address: { type: string, minLength: 10, maxLength: 300 }
+        ntn: { type: string, description: Optional; reviewers see a flag when missing }
+    KycDecision:
+      type: object
+      additionalProperties: false
+      required: [decision]
+      properties:
+        decision: { type: string, enum: [start_review, approve, approve_with_conditions, reject, request_info] }
+        note: { type: string, maxLength: 1000 }
+    KycQueue:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              id: { type: string, format: uuid }
+              storeName: { type: string }
+              status: { type: string }
+              submittedAt: { type: [string, 'null'], format: date-time }
+              flags: { type: array, items: { type: string } }
+        nextCursor: { type: [integer, 'null'] }

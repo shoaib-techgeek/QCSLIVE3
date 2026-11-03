@@ -12,14 +12,25 @@ import { LogMailer, MemoryMailer, type Mailer } from './shared/mailer.js';
 import { AuthService } from './modules/identity/auth.service.js';
 import { registerAuthGuard } from './modules/identity/auth.guard.js';
 import { registerIdentityRoutes } from './modules/identity/auth.routes.js';
+import { SellerService } from './modules/seller/seller.service.js';
+import { registerSellerRoutes } from './modules/seller/seller.routes.js';
+import { KycService } from './modules/seller/kyc.service.js';
+import { registerKycRoutes } from './modules/seller/kyc.routes.js';
+import { assignRole } from './modules/identity/identity.repository.js';
+import multipart from '@fastify/multipart';
+import { Aes256GcmEncryptor, parseEncryptionKey, type Encryptor } from './shared/encryptor.js';
+import { LocalFileStorage, MemoryFileStorage, type FileStorage } from './shared/file-storage.js';
+import { MAX_FILE_BYTES } from './modules/seller/kyc-schemas.js';
 
 export interface AppDeps {
   env: Env;
   db: Knex;
   mailer?: Mailer;
+  storage?: FileStorage;
+  encryptor?: Encryptor;
 }
 
-export async function buildApp({ env, db, mailer }: AppDeps): Promise<FastifyInstance> {
+export async function buildApp({ env, db, mailer, storage, encryptor }: AppDeps): Promise<FastifyInstance> {
   const app = Fastify({
     logger: {
       level: env.LOG_LEVEL,
@@ -45,6 +56,7 @@ export async function buildApp({ env, db, mailer }: AppDeps): Promise<FastifyIns
   await app.register(helmet);
   await app.register(rateLimit, { max: 300, timeWindow: '1 minute' });
   await app.register(cookie);
+  await app.register(multipart, { limits: { fileSize: MAX_FILE_BYTES, files: 1, fields: 5 } });
 
   app.addHook('onSend', async (req, reply) => {
     reply.header('x-request-id', req.id);
@@ -90,5 +102,20 @@ export async function buildApp({ env, db, mailer }: AppDeps): Promise<FastifyIns
 
   registerHealthRoutes(app, db);
   registerIdentityRoutes(app, authService, env);
+  registerSellerRoutes(app, new SellerService(db));
+  registerKycRoutes(app, new KycService(db, storage ?? defaultStorage(env), encryptor ?? defaultEncryptor(env), assignRole));
   return app;
+}
+
+function defaultStorage(env: Env): FileStorage {
+  if (env.STORAGE_DRIVER === 'memory') return new MemoryFileStorage();
+  if (env.STORAGE_DRIVER === 'local') return new LocalFileStorage(env.STORAGE_DIR);
+  throw new Error('STORAGE_DRIVER=s3 is not implemented yet');
+}
+
+function defaultEncryptor(env: Env): Encryptor {
+  if (env.PII_ENCRYPTION_KEY) return new Aes256GcmEncryptor(parseEncryptionKey(env.PII_ENCRYPTION_KEY));
+  // Dev convenience: the API boots without a key, but KYC details cannot be saved until one is set.
+  const fail = () => { throw new AppError(503, 'ENCRYPTION_NOT_CONFIGURED', 'Set PII_ENCRYPTION_KEY to use seller verification.'); };
+  return { encrypt: fail, decrypt: fail };
 }

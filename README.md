@@ -23,11 +23,12 @@ Multi-vendor, deal-first e-commerce marketplace (Temu-style; see [docs/PRODUCT.m
 3. Frontend: `npm install && npm run dev` (http://localhost:5173, proxies `/api` to the backend)
 
 ### Demo login (local development only)
-Created by `npm run seed:dev`; it refuses to run in production.
+Created by `npm run seed:dev` (run `npm run migrate` first; also set `PII_ENCRYPTION_KEY` from `backend/.env.example` in `backend/.env` for seller verification); it refuses to run in production.
 
 | Email | Password |
 |---|---|
 | demo@example.com | Marketplace-Demo-2026 |
+| admin@example.com (admin, can review seller applications) | Marketplace-Admin-2026 |
 
 Email verification is currently **disabled** (`REQUIRE_EMAIL_VERIFICATION=false` in `backend/.env`): new accounts are active immediately and can sign in right after registering. Set it to `true` to require the emailed link (with `MAIL_DRIVER=log` it is printed in the backend console). The code default is `true`.
 

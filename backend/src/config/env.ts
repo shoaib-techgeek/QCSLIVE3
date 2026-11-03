@@ -14,6 +14,11 @@ const schema = z.object({
   MAIL_DRIVER: z.enum(['log', 'memory']).default('log'),
   // When false, new accounts are active immediately (no email step). Safe default is true.
   REQUIRE_EMAIL_VERIFICATION: z.enum(['true', 'false']).default('true').transform((v) => v === 'true'),
+  // 32 random bytes, base64 (e.g. `openssl rand -base64 32`). Encrypts KYC PII. Required in production.
+  PII_ENCRYPTION_KEY: z.preprocess((v) => (v === '' ? undefined : v), z.string().min(1).optional()),
+  // `s3` is reserved for the production adapter, which is not built yet.
+  STORAGE_DRIVER: z.enum(['local', 'memory', 's3']).default('local'),
+  STORAGE_DIR: z.string().min(1).default('./storage'),
   AUTH_RATE_LIMIT_MAX: z.coerce.number().int().min(1).default(10),
 });
 
@@ -33,6 +38,13 @@ export function loadEnv(source: NodeJS.ProcessEnv = process.env): Env {
   if (env.NODE_ENV === 'production' && env.MAIL_DRIVER === 'log') {
     // The log driver writes verification/reset links to logs; never acceptable in production.
     throw new Error('Invalid environment configuration: MAIL_DRIVER must be a real provider in production');
+  }
+  if (env.NODE_ENV === 'production' && !env.PII_ENCRYPTION_KEY) {
+    throw new Error('Invalid environment configuration: PII_ENCRYPTION_KEY must be set in production');
+  }
+  if (env.NODE_ENV === 'production' && env.STORAGE_DRIVER !== 's3') {
+    // Local disk and memory storage are development/test only.
+    throw new Error('Invalid environment configuration: STORAGE_DRIVER must be a production-grade driver in production');
   }
   // Tests must never touch the development database.
   const DB_ACTIVE_NAME = env.NODE_ENV === 'test' ? env.DB_TEST_NAME : env.DB_NAME;

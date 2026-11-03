@@ -1,0 +1,347 @@
+- generic [ref=f1e2]:
+  - link "Skip to content" [ref=f1e3] [cursor=pointer]:
+    - /url: "#main"
+  - generic [ref=f1e6]:
+    - link "Sell on QCS Store" [ref=f1e7] [cursor=pointer]:
+      - /url: /seller/onboarding
+    - group "Colour theme" [ref=f1e8]:
+      - button "Match system theme" [pressed] [ref=f1e9] [cursor=pointer]
+      - button "Light theme" [ref=f1e12] [cursor=pointer]
+      - button "Dark theme" [ref=f1e15] [cursor=pointer]
+  - banner [ref=f1e18]:
+    - generic [ref=f1e19]:
+      - link "QCS Store" [ref=f1e20] [cursor=pointer]:
+        - /url: /
+      - search [ref=f1e28]:
+        - searchbox "Search products" [ref=f1e29]
+        - button "Search" [ref=f1e30] [cursor=pointer]
+      - button "Cart, 0 items" [ref=f1e34] [cursor=pointer]:
+        - generic [ref=f1e37]: "0"
+  - main [ref=f1e38]:
+    - region [ref=f1e39]:
+      - generic [ref=f1e41]:
+        - heading "Everything a market has, in one place." [level=1] [ref=f1e42]
+        - paragraph [ref=f1e43]: Browse products from independent sellers, check out once, and follow every order.
+        - generic [ref=f1e44]:
+          - link "Start shopping" [ref=f1e45] [cursor=pointer]:
+            - /url: "#best-sellers"
+          - link "Sell on QCS Store" [ref=f1e46] [cursor=pointer]:
+            - /url: /seller/onboarding
+    - generic [ref=f1e58]:
+      - list "Why shop with us" [ref=f1e59]:
+        - listitem [ref=f1e60]:
+          - strong [ref=f1e61]: Cash on delivery
+          - generic [ref=f1e62]: Pay when your order arrives, anywhere in Pakistan.
+        - listitem [ref=f1e63]:
+          - strong [ref=f1e64]: 14-day returns
+          - generic [ref=f1e65]: Send an item back within 14 days of delivery.
+        - listitem [ref=f1e66]:
+          - strong [ref=f1e67]: Verified sellers
+          - generic [ref=f1e68]: We check every seller’s business before they can publish.
+        - listitem [ref=f1e69]:
+          - strong [ref=f1e70]: Follow every order
+          - generic [ref=f1e71]: See where your order is from the moment the seller ships it.
+      - region [ref=f1e72]:
+        - heading "Shop by category" [level=2] [ref=f1e73]
+        - list [ref=f1e74]:
+          - listitem [ref=f1e75]:
+            - link "Women" [ref=f1e76] [cursor=pointer]:
+              - /url: /?category=women
+          - listitem [ref=f1e79]:
+            - link "Men" [ref=f1e80] [cursor=pointer]:
+              - /url: /?category=men
+          - listitem [ref=f1e83]:
+            - link "Home and kitchen" [ref=f1e84] [cursor=pointer]:
+              - /url: /?category=home-kitchen
+          - listitem [ref=f1e87]:
+            - link "Electronics" [ref=f1e88] [cursor=pointer]:
+              - /url: /?category=electronics
+          - listitem [ref=f1e91]:
+            - link "Phones and accessories" [ref=f1e92] [cursor=pointer]:
+              - /url: /?category=phones
+          - listitem [ref=f1e95]:
+            - link "Beauty and health" [ref=f1e96] [cursor=pointer]:
+              - /url: /?category=beauty-health
+          - listitem [ref=f1e99]:
+            - link "Kids and toys" [ref=f1e100] [cursor=pointer]:
+              - /url: /?category=kids-toys
+          - listitem [ref=f1e103]:
+            - link "Bags and shoes" [ref=f1e104] [cursor=pointer]:
+              - /url: /?category=bags-shoes
+          - listitem [ref=f1e107]:
+            - link "Sports and outdoors" [ref=f1e108] [cursor=pointer]:
+              - /url: /?category=sports
+          - listitem [ref=f1e111]:
+            - link "Automotive" [ref=f1e112] [cursor=pointer]:
+              - /url: /?category=automotive
+      - note [ref=f1e115]: The catalogue opens soon. The products below are samples so you can see how the store will look.
+      - region [ref=f1e116]:
+        - generic [ref=f1e117]:
+          - heading "Best sellers" [level=2] [ref=f1e118]
+          - link "See all best sellers" [ref=f1e119] [cursor=pointer]:
+            - /url: /?sort=best
+        - generic [ref=f1e120]:
+          - article [ref=f1e121]:
+            - generic [ref=f1e124]: 28% off
+            - generic [ref=f1e125]:
+              - heading [level=3] [ref=f1e126]:
+                - link "Stainless steel water bottle, 750 ml" [ref=f1e127] [cursor=pointer]:
+                  - /url: /
+              - generic [ref=f1e128]:
+                - generic [ref=f1e129]: Rs 1,299
+                - generic [ref=f1e130]:
+                  - generic [ref=f1e131]: Was
+                  - text: Rs 1,799
+              - generic [ref=f1e132]:
+                - text: "4.8"
+                - generic [ref=f1e135]: out of 5
+          - article [ref=f1e136]:
+            - generic [ref=f1e139]:
+              - heading [level=3] [ref=f1e140]:
+                - link "Cotton bedsheet set, double" [ref=f1e141] [cursor=pointer]:
+                  - /url: /
+              - generic [ref=f1e142]: Rs 2,499
+              - generic [ref=f1e144]:
+                - text: "4.6"
+                - generic [ref=f1e147]: out of 5
+          - article [ref=f1e148]:
+            - generic [ref=f1e151]: 30% off
+            - generic [ref=f1e152]:
+              - heading [level=3] [ref=f1e153]:
+                - link "Wireless earbuds with charging case" [ref=f1e154] [cursor=pointer]:
+                  - /url: /
+              - generic [ref=f1e155]:
+                - generic [ref=f1e156]: Rs 3,499
+                - generic [ref=f1e157]:
+                  - generic [ref=f1e158]: Was
+                  - text: Rs 4,999
+              - generic [ref=f1e159]:
+                - text: "4.5"
+                - generic [ref=f1e162]: out of 5
+          - article [ref=f1e163]:
+            - generic [ref=f1e166]:
+              - heading [level=3] [ref=f1e167]:
+                - link "Non-stick frying pan, 26 cm" [ref=f1e168] [cursor=pointer]:
+                  - /url: /
+              - generic [ref=f1e169]: Rs 1,799
+              - generic [ref=f1e171]:
+                - text: "4.7"
+                - generic [ref=f1e174]: out of 5
+          - article [ref=f1e175]:
+            - generic [ref=f1e178]:
+              - heading [level=3] [ref=f1e179]:
+                - link "Phone stand, adjustable aluminium" [ref=f1e180] [cursor=pointer]:
+                  - /url: /
+              - generic [ref=f1e181]: Rs 499
+              - generic [ref=f1e183]:
+                - text: "4.4"
+                - generic [ref=f1e186]: out of 5
+          - article [ref=f1e187]:
+            - generic [ref=f1e190]: 27% off
+            - generic [ref=f1e191]:
+              - heading [level=3] [ref=f1e192]:
+                - link "Men’s running shoes, lightweight" [ref=f1e193] [cursor=pointer]:
+                  - /url: /
+              - generic [ref=f1e194]:
+                - generic [ref=f1e195]: Rs 3,999
+                - generic [ref=f1e196]:
+                  - generic [ref=f1e197]: Was
+                  - text: Rs 5,499
+              - generic [ref=f1e198]:
+                - text: "4.6"
+                - generic [ref=f1e201]: out of 5
+      - region [ref=f1e202]:
+        - generic [ref=f1e203]:
+          - heading "New in" [level=2] [ref=f1e204]
+          - link "See all new in" [ref=f1e205] [cursor=pointer]:
+            - /url: /?sort=new
+        - generic [ref=f1e206]:
+          - article [ref=f1e207]:
+            - generic [ref=f1e210]:
+              - heading [level=3] [ref=f1e211]:
+                - link "Women’s lawn suit, 3-piece" [ref=f1e212] [cursor=pointer]:
+                  - /url: /
+              - generic [ref=f1e213]: Rs 2,899
+              - generic [ref=f1e215]:
+                - text: "4.3"
+                - generic [ref=f1e218]: out of 5
+          - article [ref=f1e219]:
+            - generic [ref=f1e222]:
+              - heading [level=3] [ref=f1e223]:
+                - link "Kids’ building blocks, 120 pieces" [ref=f1e224] [cursor=pointer]:
+                  - /url: /
+              - generic [ref=f1e225]: Rs 1,199
+              - generic [ref=f1e227]:
+                - text: "4.5"
+                - generic [ref=f1e230]: out of 5
+          - article [ref=f1e231]:
+            - generic [ref=f1e234]:
+              - heading [level=3] [ref=f1e235]:
+                - link "LED desk lamp, rechargeable" [ref=f1e236] [cursor=pointer]:
+                  - /url: /
+              - generic [ref=f1e237]: Rs 1,599
+              - generic [ref=f1e239]:
+                - text: "4.4"
+                - generic [ref=f1e242]: out of 5
+          - article [ref=f1e243]:
+            - generic [ref=f1e246]: 29% off
+            - generic [ref=f1e247]:
+              - heading [level=3] [ref=f1e248]:
+                - link "Leather wallet, slim" [ref=f1e249] [cursor=pointer]:
+                  - /url: /
+              - generic [ref=f1e250]:
+                - generic [ref=f1e251]: Rs 999
+                - generic [ref=f1e252]:
+                  - generic [ref=f1e253]: Was
+                  - text: Rs 1,399
+              - generic [ref=f1e254]:
+                - text: "4.2"
+                - generic [ref=f1e257]: out of 5
+          - article [ref=f1e258]:
+            - generic [ref=f1e261]:
+              - heading [level=3] [ref=f1e262]:
+                - link "Yoga mat, non-slip, 6 mm" [ref=f1e263] [cursor=pointer]:
+                  - /url: /
+              - generic [ref=f1e264]: Rs 1,399
+              - generic [ref=f1e266]:
+                - text: "4.6"
+                - generic [ref=f1e269]: out of 5
+          - article [ref=f1e270]:
+            - generic [ref=f1e273]:
+              - heading [level=3] [ref=f1e274]:
+                - link "Car seat organiser, 2 pockets" [ref=f1e275] [cursor=pointer]:
+                  - /url: /
+              - generic [ref=f1e276]: Rs 699
+              - generic [ref=f1e278]:
+                - text: "4.1"
+                - generic [ref=f1e281]: out of 5
+      - region [ref=f1e282]:
+        - generic [ref=f1e283]:
+          - heading "Top rated" [level=2] [ref=f1e284]
+          - link "See all top rated" [ref=f1e285] [cursor=pointer]:
+            - /url: /?sort=rated
+        - generic [ref=f1e286]:
+          - article [ref=f1e287]:
+            - generic [ref=f1e290]:
+              - heading [level=3] [ref=f1e291]:
+                - link "Electric kettle, 1.7 litre" [ref=f1e292] [cursor=pointer]:
+                  - /url: /
+              - generic [ref=f1e293]: Rs 2,199
+              - generic [ref=f1e295]:
+                - text: "4.9"
+                - generic [ref=f1e298]: out of 5
+          - article [ref=f1e299]:
+            - generic [ref=f1e302]:
+              - heading [level=3] [ref=f1e303]:
+                - link "Backpack, 25 litre, water resistant" [ref=f1e304] [cursor=pointer]:
+                  - /url: /
+              - generic [ref=f1e305]: Rs 2,699
+              - generic [ref=f1e307]:
+                - text: "4.8"
+                - generic [ref=f1e310]: out of 5
+          - article [ref=f1e311]:
+            - generic [ref=f1e314]: 25% off
+            - generic [ref=f1e315]:
+              - heading [level=3] [ref=f1e316]:
+                - link "Face serum, vitamin C, 30 ml" [ref=f1e317] [cursor=pointer]:
+                  - /url: /
+              - generic [ref=f1e318]:
+                - generic [ref=f1e319]: Rs 1,199
+                - generic [ref=f1e320]:
+                  - generic [ref=f1e321]: Was
+                  - text: Rs 1,599
+              - generic [ref=f1e322]:
+                - text: "4.8"
+                - generic [ref=f1e325]: out of 5
+          - article [ref=f1e326]:
+            - generic [ref=f1e329]:
+              - heading [level=3] [ref=f1e330]:
+                - link "Bluetooth speaker, portable" [ref=f1e331] [cursor=pointer]:
+                  - /url: /
+              - generic [ref=f1e332]: Rs 2,999
+              - generic [ref=f1e334]:
+                - text: "4.7"
+                - generic [ref=f1e337]: out of 5
+          - article [ref=f1e338]:
+            - generic [ref=f1e341]:
+              - heading [level=3] [ref=f1e342]:
+                - link "Kitchen knife set, 5 pieces" [ref=f1e343] [cursor=pointer]:
+                  - /url: /
+              - generic [ref=f1e344]: Rs 1,899
+              - generic [ref=f1e346]:
+                - text: "4.7"
+                - generic [ref=f1e349]: out of 5
+          - article [ref=f1e350]:
+            - generic [ref=f1e353]: 24% off
+            - generic [ref=f1e354]:
+              - heading [level=3] [ref=f1e355]:
+                - link "Power bank, 10,000 mAh" [ref=f1e356] [cursor=pointer]:
+                  - /url: /
+              - generic [ref=f1e357]:
+                - generic [ref=f1e358]: Rs 1,899
+                - generic [ref=f1e359]:
+                  - generic [ref=f1e360]: Was
+                  - text: Rs 2,499
+              - generic [ref=f1e361]:
+                - text: "4.7"
+                - generic [ref=f1e364]: out of 5
+    - region [ref=f1e365]:
+      - generic [ref=f1e366]:
+        - generic [ref=f1e367]:
+          - heading "Sell on QCS Store" [level=2] [ref=f1e368]
+          - paragraph [ref=f1e369]: Open a store, verify your business and reach shoppers across Pakistan. You list the products and ship the orders.
+          - link "Sell on QCS Store" [ref=f1e370] [cursor=pointer]:
+            - /url: /seller/onboarding
+        - list [ref=f1e371]:
+          - listitem [ref=f1e372]:
+            - strong [ref=f1e373]: Create your store
+            - generic [ref=f1e374]: Pick a name and tell shoppers what you sell.
+          - listitem [ref=f1e375]:
+            - strong [ref=f1e376]: Verify your business
+            - generic [ref=f1e377]: Upload your CNIC, registration document and photos of your business.
+          - listitem [ref=f1e378]:
+            - strong [ref=f1e379]: List your products
+            - generic [ref=f1e380]: Add products and stock, then ship orders yourself.
+  - contentinfo [ref=f1e381]:
+    - generic [ref=f1e382]:
+      - generic [ref=f1e383]:
+        - link "QCS Store" [ref=f1e384] [cursor=pointer]:
+          - /url: /
+        - paragraph [ref=f1e392]: Products from independent sellers, with cash on delivery in Pakistan and 14-day returns.
+      - navigation "Shop" [ref=f1e393]:
+        - heading "Shop" [level=2] [ref=f1e394]
+        - list [ref=f1e395]:
+          - listitem [ref=f1e396]:
+            - link "Women" [ref=f1e397] [cursor=pointer]:
+              - /url: /?category=women
+          - listitem [ref=f1e398]:
+            - link "Men" [ref=f1e399] [cursor=pointer]:
+              - /url: /?category=men
+          - listitem [ref=f1e400]:
+            - link "Home and kitchen" [ref=f1e401] [cursor=pointer]:
+              - /url: /?category=home-kitchen
+          - listitem [ref=f1e402]:
+            - link "Electronics" [ref=f1e403] [cursor=pointer]:
+              - /url: /?category=electronics
+          - listitem [ref=f1e404]:
+            - link "Phones and accessories" [ref=f1e405] [cursor=pointer]:
+              - /url: /?category=phones
+          - listitem [ref=f1e406]:
+            - link "Beauty and health" [ref=f1e407] [cursor=pointer]:
+              - /url: /?category=beauty-health
+      - navigation "Sell" [ref=f1e408]:
+        - heading "Sell" [level=2] [ref=f1e409]
+        - list [ref=f1e410]:
+          - listitem [ref=f1e411]:
+            - link "Sell on QCS Store" [ref=f1e412] [cursor=pointer]:
+              - /url: /seller/onboarding
+      - navigation "Account" [ref=f1e413]:
+        - heading "Account" [level=2] [ref=f1e414]
+        - list [ref=f1e415]:
+          - listitem [ref=f1e416]:
+            - link "Sign in" [ref=f1e417] [cursor=pointer]:
+              - /url: /login
+          - listitem [ref=f1e418]:
+            - link "Create account" [ref=f1e419] [cursor=pointer]:
+              - /url: /register
+    - paragraph [ref=f1e420]: © 2026 QCS Store

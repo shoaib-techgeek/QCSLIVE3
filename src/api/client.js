@@ -19,7 +19,7 @@ export class ApiError extends Error {
  * Thin fetch wrapper. The session lives in an HttpOnly cookie, so no token is handled here.
  * `X-Requested-With` is required by the API for state-changing requests (CSRF guard).
  */
-export async function request(path, { method = 'GET', body } = {}) {
+export async function request(path, { method = 'GET', body, form } = {}) {
   let res
   try {
     res = await fetch(`/api/v1${path}`, {
@@ -29,7 +29,8 @@ export async function request(path, { method = 'GET', body } = {}) {
         'X-Requested-With': 'XMLHttpRequest',
         ...(body !== undefined ? { 'Content-Type': 'application/json' } : {}),
       },
-      body: body !== undefined ? JSON.stringify(body) : undefined,
+      // For `form` (FormData) the browser sets the multipart boundary itself.
+      body: form ?? (body !== undefined ? JSON.stringify(body) : undefined),
     })
   } catch {
     throw new ApiError(0, 'NETWORK_ERROR', 'Could not reach the server. Check your connection and try again.')
