@@ -4,7 +4,10 @@ import { vi } from 'vitest'
 import App from '../App.jsx'
 
 /** Queue of [matcher, response] pairs; each fetch call consumes the first match. */
+export const EMPTY_CART = { groups: [], summary: { itemCount: 0, subtotalMinor: 0, currency: 'PKR' }, changes: [] }
+
 export function mockApi(routes) {
+  routes = { 'GET /api/v1/cart': { json: EMPTY_CART }, ...routes }
   const calls = []
   const fn = vi.fn(async (url, init = {}) => {
     const method = init.method ?? 'GET'

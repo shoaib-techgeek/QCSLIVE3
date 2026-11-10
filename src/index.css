@@ -14,10 +14,10 @@ h1, h2 { font-family: var(--font-display); line-height: 1.12; letter-spacing: -0
 h1 { font-size: clamp(1.75rem, 1.2rem + 2vw, 2.4rem); font-weight: 700; }
 h2 { font-size: 1.2rem; font-weight: 650; }
 p { margin: 0 0 1rem; }
-a { color: var(--primary); text-underline-offset: 3px; }
+a { color: var(--link); text-underline-offset: 3px; }
 a:hover { color: var(--primary-strong); }
 .muted { color: var(--muted); }
-:focus-visible { outline: 3px solid var(--primary); outline-offset: 2px; border-radius: 6px; }
+:focus-visible { outline: 3px solid var(--link); outline-offset: 2px; border-radius: 6px; }
 
 .skip-link { position: absolute; left: -999px; top: 0; background: var(--surface); color: var(--ink); padding: 0.6rem 1rem; z-index: 50; border-radius: 0 0 10px 0; }
 .skip-link:focus { left: 0; }

@@ -3,7 +3,7 @@ import { z } from 'zod';
 export const DOCUMENT_KINDS = ['cnic_front', 'cnic_back', 'business_registration', 'business_photo', 'tax_certificate'] as const;
 export const REQUIRED_KINDS = ['cnic_front', 'cnic_back', 'business_registration', 'business_photo'] as const;
 export const MAX_PHOTOS = 4;
-export const MAX_FILE_BYTES = 5 * 1024 * 1024;
+export { MAX_UPLOAD_BYTES as MAX_FILE_BYTES } from '../../shared/file-storage.js';
 
 export const documentKindSchema = z.enum(DOCUMENT_KINDS);
 

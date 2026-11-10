@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext.jsx'
-import { CATEGORIES } from '../lib/sampleCatalog.js'
+import { CATEGORIES } from '../lib/categories.js'
 import { sellerLinkFor } from '../lib/sellerLink.js'
 import Logo from './Logo.jsx'
 
@@ -16,7 +16,7 @@ export default function SiteFooter() {
         </div>
         <nav aria-label="Shop" className="footer-col">
           <h2>Shop</h2>
-          <ul>{CATEGORIES.slice(0, 6).map((c) => <li key={c.slug}><Link to={`/?category=${c.slug}`}>{c.name}</Link></li>)}</ul>
+          <ul>{CATEGORIES.slice(0, 6).map((c) => <li key={c.slug}><Link to={`/search?category=${c.slug}`}>{c.name}</Link></li>)}</ul>
         </nav>
         <nav aria-label="Sell" className="footer-col">
           <h2>Sell</h2>

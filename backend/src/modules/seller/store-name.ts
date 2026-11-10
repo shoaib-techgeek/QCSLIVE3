@@ -1,15 +1,8 @@
+import { slugify } from '../../shared/slug.js';
+
 const RESERVED = new Set(['admin', 'api', 'seller', 'sellers', 'store', 'stores', 'support', 'qcs', 'qcs-store', 'www', 'help']);
 
-export function slugifyStoreName(name: string): string {
-  return name
-    .normalize('NFKD')
-    .replace(/[̀-ͯ]/g, '')
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
-    .slice(0, 60)
-    .replace(/-+$/, '');
-}
+export const slugifyStoreName = (name: string): string => slugify(name, 60);
 
 export function validateStoreName(name: string): { ok: true; slug: string } | { ok: false; message: string } {
   const trimmed = name.trim();

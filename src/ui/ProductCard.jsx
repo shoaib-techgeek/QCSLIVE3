@@ -2,8 +2,10 @@ import { Link } from 'react-router-dom'
 import { formatMoney } from '../lib/money.js'
 import Icon from './Icon.jsx'
 
+const formatCount = (n) => (n >= 1000 ? `${(n / 1000).toFixed(n >= 10000 ? 0 : 1).replace(/\.0$/, '')}K` : String(n))
+
 /** Prices arrive as integer minor units. `to` makes the whole card one link target. */
-export default function ProductCard({ title, to, priceMinor, wasMinor, currency = 'PKR', imageUrl, rating, flag }) {
+export default function ProductCard({ title, to, priceMinor, wasMinor, currency = 'PKR', imageUrl, rating, flag, sold, verified }) {
   const off = wasMinor > priceMinor ? Math.round((1 - priceMinor / wasMinor) * 100) : 0
   return (
     <article className="product-card">
@@ -17,9 +19,15 @@ export default function ProductCard({ title, to, priceMinor, wasMinor, currency 
           <span className="price">{formatMoney(priceMinor, currency)}</span>
           {off > 0 && <span className="price-was"><span className="visually-hidden">Was </span>{formatMoney(wasMinor, currency)}</span>}
         </div>
-        {rating !== undefined && (
-          <span className="rating"><Icon name="star" size={14} /> {rating.toFixed(1)}<span className="visually-hidden"> out of 5</span></span>
+        {(rating !== undefined || sold !== undefined) && (
+          <div className="product-meta">
+            {rating !== undefined && (
+              <span className="rating"><Icon name="star" size={14} /> {rating.toFixed(1)}<span className="visually-hidden"> out of 5</span></span>
+            )}
+            {sold !== undefined && <span className="sold">{formatCount(sold)} sold</span>}
+          </div>
         )}
+        {verified && <span className="verified-badge">Verified seller</span>}
       </div>
     </article>
   )

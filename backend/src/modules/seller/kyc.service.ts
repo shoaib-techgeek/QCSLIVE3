@@ -6,7 +6,7 @@ import type { Encryptor } from '../../shared/encryptor.js';
 import { AppError } from '../../shared/errors.js';
 import type { FileStorage } from '../../shared/file-storage.js';
 import { publishEvent } from '../../shared/outbox.js';
-import { sniffMime } from './file-sniff.js';
+import { sniffMime } from '../../shared/file-sniff.js';
 import { canPublish, transitionKyc, type KycStatus } from './kyc.js';
 import * as repo from './kyc.repository.js';
 import { DECISIONS, MAX_PHOTOS, REQUIRED_KINDS } from './kyc-schemas.js';

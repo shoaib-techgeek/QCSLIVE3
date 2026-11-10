@@ -10,6 +10,8 @@ declare module 'fastify' {
     authz: {
       requireAuth: (req: FastifyRequest) => Promise<void>;
       requirePermission: (permission: string) => (req: FastifyRequest) => Promise<void>;
+      /** For routes that serve everyone but treat some callers differently; never a substitute for requirePermission. */
+      can: (req: FastifyRequest, permission: string) => Promise<boolean>;
     };
   }
 }
@@ -43,5 +45,6 @@ export function registerAuthGuard(app: FastifyInstance, service: AuthService): v
       throw new AppError(403, 'FORBIDDEN', 'You do not have permission to do this.');
     }
   };
-  app.decorate('authz', { requireAuth, requirePermission });
+  const can = async (req: FastifyRequest, permission: string) => (req.auth ? service.hasPermission(req.auth.userId, permission) : false);
+  app.decorate('authz', { requireAuth, requirePermission, can });
 }

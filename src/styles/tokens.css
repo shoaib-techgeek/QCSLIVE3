@@ -1,46 +1,53 @@
-/* Design tokens. Theme: <html data-theme="light|dark">; absent = follow the system. */
+/* Design tokens. Theme: <html data-theme="light|dark">; absent = follow the system.
+   Palette follows the common big-marketplace look: white page, red header, orange price and action, green trust. */
 :root {
   /* Surfaces and text */
-  --canvas: #f5f4fb;
+  --canvas: #ffffff;
   --surface: #ffffff;
-  --surface-2: #faf9ff;
-  --ink: #1d1a3b;
-  --muted: #5f5b86;
-  --line: #e3e0f2;
+  --surface-2: #f5f5f5;
+  --ink: #222222;
+  --muted: #666666;
+  --line: #e6e6e6;
 
   /* Brand */
-  --primary: #5b3df5;
-  --primary-strong: #4a2fd6;
-  --primary-soft: #ece8ff;
-  --on-primary: #ffffff;
-  --brand: #3b24c9;
-  --mango: #ffb938;
+  --primary: #fb7701;
+  --primary-strong: #e56a00;
+  --primary-soft: #fff0e0;
+  --on-primary: #1a1a1a;
+  --link: #b34d00;
+  --brand: #b6030c;
+  --mango: #ffc233;
   --teal: #15b8a6;
   --coral: #ff6f59;
-  --bar: #c8302a;
+  --bar: #b6030c;
   --bar-ink: #ffffff;
+  --hero: #9c0209;
+  --price: #e56a00;
+  --trust: #0b8000;
+  --black: #000000;
+  --charcoal: #1a1a1a;
 
   /* Status */
   --error: #b42318;
   --error-bg: #fdecea;
-  --success: #0b7a55;
-  --success-bg: #e4f6ee;
+  --success: #0b7a1f;
+  --success-bg: #e6f4e5;
   --warning: #8a5a00;
   --warning-bg: #fff3d6;
   --info: #1b5fb4;
   --info-bg: #e5f0ff;
 
   /* Effects */
-  --ring: rgba(91, 61, 245, 0.28);
-  --overlay: rgba(20, 16, 50, 0.55);
-  --shadow-sm: 0 1px 2px rgba(29, 26, 59, 0.06);
-  --shadow: 0 1px 2px rgba(29, 26, 59, 0.06), 0 18px 40px -18px rgba(91, 61, 245, 0.28);
-  --shadow-lg: 0 2px 6px rgba(29, 26, 59, 0.08), 0 32px 64px -24px rgba(29, 26, 59, 0.4);
+  --ring: rgba(251, 119, 1, 0.35);
+  --overlay: rgba(0, 0, 0, 0.55);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.06);
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.06), 0 10px 24px -12px rgba(0, 0, 0, 0.25);
+  --shadow-lg: 0 2px 6px rgba(0, 0, 0, 0.08), 0 32px 64px -24px rgba(0, 0, 0, 0.4);
 
   /* Shape and rhythm (8px grid) */
-  --radius-sm: 8px;
-  --radius: 14px;
-  --radius-lg: 20px;
+  --radius-sm: 4px;
+  --radius: 8px;
+  --radius-lg: 12px;
   --space-1: 0.25rem;
   --space-2: 0.5rem;
   --space-3: 0.75rem;
@@ -49,9 +56,9 @@
   --space-8: 2rem;
   --tap: 44px;
 
-  /* Type */
-  --font-body: 'DM Sans Variable', system-ui, sans-serif;
-  --font-display: 'Bricolage Grotesque Variable', 'DM Sans Variable', system-ui, sans-serif;
+  /* Type: the platform's own UI font, as the big marketplaces use */
+  --font-body: system-ui, -apple-system, 'Segoe UI', Roboto, 'Noto Sans', 'Helvetica Neue', Arial, sans-serif;
+  --font-display: var(--font-body);
 
   /* Motion */
   --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
@@ -62,18 +69,19 @@
 
 :root[data-theme='dark'] {
   color-scheme: dark;
-  --canvas: #0f0d24;
-  --surface: #181536;
-  --surface-2: #1e1b42;
-  --ink: #eeebff;
-  --muted: #a7a3cf;
-  --line: #2d2957;
-  --primary: #8b73ff;
-  --primary-strong: #a595ff;
-  --primary-soft: #2a2468;
-  --on-primary: #120e2e;
-  --brand: #2a1b94;
-  --bar: #a3231e;
+  --canvas: #121212;
+  --surface: #1c1c1c;
+  --surface-2: #262626;
+  --ink: #f2f2f2;
+  --muted: #b0b0b0;
+  --line: #333333;
+  --primary-strong: #ff8f2e;
+  --primary-soft: #3a2208;
+  --link: #ff9a4d;
+  --brand: #8f0209;
+  --bar: #8f0209;
+  --hero: #7a0107;
+  --price: #ff9a4d;
   --error: #ff9b91;
   --error-bg: #3a1a1c;
   --success: #6ce9a6;
@@ -82,7 +90,6 @@
   --warning-bg: #3a2c0c;
   --info: #8ebcff;
   --info-bg: #14284a;
-  --ring: rgba(139, 115, 255, 0.4);
   --overlay: rgba(0, 0, 0, 0.65);
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
   --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 18px 40px -18px rgba(0, 0, 0, 0.7);
@@ -92,18 +99,19 @@
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
     color-scheme: dark;
-    --canvas: #0f0d24;
-    --surface: #181536;
-    --surface-2: #1e1b42;
-    --ink: #eeebff;
-    --muted: #a7a3cf;
-    --line: #2d2957;
-    --primary: #8b73ff;
-    --primary-strong: #a595ff;
-    --primary-soft: #2a2468;
-    --on-primary: #120e2e;
-    --brand: #2a1b94;
-    --bar: #a3231e;
+    --canvas: #121212;
+    --surface: #1c1c1c;
+    --surface-2: #262626;
+    --ink: #f2f2f2;
+    --muted: #b0b0b0;
+    --line: #333333;
+    --primary-strong: #ff8f2e;
+    --primary-soft: #3a2208;
+    --link: #ff9a4d;
+    --brand: #8f0209;
+    --bar: #8f0209;
+    --hero: #7a0107;
+    --price: #ff9a4d;
     --error: #ff9b91;
     --error-bg: #3a1a1c;
     --success: #6ce9a6;
@@ -112,7 +120,6 @@
     --warning-bg: #3a2c0c;
     --info: #8ebcff;
     --info-bg: #14284a;
-    --ring: rgba(139, 115, 255, 0.4);
     --overlay: rgba(0, 0, 0, 0.65);
     --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
     --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 18px 40px -18px rgba(0, 0, 0, 0.7);

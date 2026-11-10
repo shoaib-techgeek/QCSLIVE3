@@ -18,4 +18,9 @@ export function registerSellerRoutes(app: FastifyInstance, service: SellerServic
     const body = updateSellerSchema.parse(req.body);
     return { seller: await service.updateDescription(actorOf(req), body.description) };
   });
+
+  app.get('/api/v1/stores/:slug', async (req, reply) => {
+    const store = await service.publicBySlug(String((req.params as { slug: string }).slug));
+    return reply.header('cache-control', 'public, max-age=0, s-maxage=60').send({ store });
+  });
 }

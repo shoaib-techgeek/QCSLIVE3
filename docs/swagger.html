@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>QCS Store API</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.17.14/swagger-ui.min.css">
+</head>
+<body>
+  <div id="ui"></div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.17.14/swagger-ui-bundle.min.js"></script>
+  <script>
+    SwaggerUIBundle({
+      url: 'openapi.yaml',
+      dom_id: '#ui',
+      requestInterceptor: (req) => { req.url = req.url.replace('http://localhost:4000', location.origin); req.headers['X-Requested-With'] = 'XMLHttpRequest'; req.credentials = 'include'; return req; },
+    });
+  </script>
+</body>
+</html>

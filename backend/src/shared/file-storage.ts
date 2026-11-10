@@ -1,6 +1,9 @@
 import { mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 
+/** Upload size limit shared by every module that accepts files. */
+export const MAX_UPLOAD_BYTES = 5 * 1024 * 1024;
+
 /** Private blob storage. Production uses an S3-compatible adapter (not built yet); local disk is development only. */
 export interface FileStorage {
   put(key: string, data: Buffer): Promise<void>;

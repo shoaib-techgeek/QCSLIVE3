@@ -26,3 +26,16 @@ export async function insertSeller(db: Db, s: { publicId: string; userId: number
 
 export const updateDescription = (db: Db, userId: number, description: string | null): Promise<number> =>
   db('sellers').where({ user_id: userId }).update({ description, version: db.raw('version + 1'), updated_at: db.fn.now(3) });
+
+export async function namesByIds(db: Db, ids: number[]): Promise<Map<number, string>> {
+  if (ids.length === 0) return new Map();
+  const rows = await db('sellers').whereIn('id', ids).select('id', 'store_name');
+  return new Map(rows.map((r) => [Number(r.id), String(r.store_name)]));
+}
+
+export const findActiveBySlug = (db: Db, slug: string): Promise<SellerRow | undefined> =>
+  db<SellerRow>('sellers').where({ slug, status: 'active' }).first();
+
+export async function nonActiveIds(db: Db): Promise<number[]> {
+  return (await db('sellers').whereIn('status', ['suspended', 'closed']).pluck('id')).map(Number);
+}

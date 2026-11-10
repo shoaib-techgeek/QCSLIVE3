@@ -7,8 +7,8 @@ export default function AuthShell({ children }) {
       <aside className="auth-brand" aria-hidden="true">
         <div className="awning awning-lg" />
         <div className="auth-brand-body">
-          <div className="auth-brand-logo"><Logo size={36} /> QCS Live</div>
-          <p className="auth-brand-title">Your marketplace, open for business.</p>
+          <div className="auth-brand-logo"><Logo size={36} /> QCS Store</div>
+          <p className="auth-brand-title">Your marketplace, open for busi.</p>
           <p className="auth-brand-text">One account for everything you buy and every order you track.</p>
           <div className="tile-row">
             <span className="tile tile-mango" />

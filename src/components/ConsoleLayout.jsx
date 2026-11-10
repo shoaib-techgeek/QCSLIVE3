@@ -23,7 +23,7 @@ export default function ConsoleLayout({ title, nav }) {
       <aside className="console-side" data-open={open}>
         <Link to="/" className="console-brand">
           <Logo size={32} />
-          <span>QCS Live<small>{title}</small></span>
+          <span>QCS Store<small>{title}</small></span>
         </Link>
         <nav className="console-nav" aria-label={title}>
           {nav.map((item) => (

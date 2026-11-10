@@ -48,5 +48,5 @@ export async function stopTestApp({ app, db }: TestContext): Promise<void> {
 
 /** Clears identity data between tests; seeded roles/permissions are kept. */
 export async function resetIdentityData(db: Knex): Promise<void> {
-  for (const t of ['kyc_status_history', 'kyc_pii', 'kyc_documents', 'kyc_applications', 'sellers', 'sessions', 'one_time_tokens', 'user_roles', 'users', 'audit_events']) await db(t).delete();
+  for (const t of ['cart_items', 'carts', 'product_images', 'price_history', 'product_status_history', 'skus', 'product_option_values', 'product_options', 'products', 'kyc_status_history', 'kyc_pii', 'kyc_documents', 'kyc_applications', 'sellers', 'sessions', 'one_time_tokens', 'user_roles', 'users', 'audit_events']) await db(t).delete();
 }

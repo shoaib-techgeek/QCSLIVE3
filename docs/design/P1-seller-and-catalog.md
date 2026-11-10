@@ -95,13 +95,13 @@ Errors use the existing envelope; new machine codes: `KYC_INVALID_TRANSITION`, `
 | P1.1 ✅ | Seller profile + permissions + openapi | create once per user, unique store name, IDOR |
 | P1.2 ✅ | `FileStorage` + `Encryptor` + KYC domain state machine (pure) | exhaustive transition table, encryption round-trip |
 | P1.3 ✅ | KYC endpoints + admin decision + role grant via event | upload validation, PII masked, audit rows, e2e approve |
-| P1.4 | Categories + product/SKU domain (variant matrix, price rules, state machine) | 3×4 = 12 SKUs, illegal transitions, price rules |
-| P1.5 | Seller product API + images + price history + events | IDOR, `price.changed` emitted, seller-not-approved blocked |
-| P1.6 | Admin moderation API | transitions, reasons required |
-| P1.7 | Inventory domain + concurrency test | 50 parallel reserves on stock 1 → 1 success; movement sums |
-| P1.8 | Public catalog + search API | only active products, cursor paging, fulltext, no private fields (contract test) |
-| P1.9 | Frontend: seller center + admin queues | component tests, a11y basics |
-| P1.10 | Frontend: buyer catalog pages + E2E journey | seller creates → admin approves → buyer finds and views |
+| P1.4 ✅ | Categories + product/SKU domain (variant matrix, price rules, state machine) | 3×4 = 12 SKUs, illegal transitions, price rules |
+| P1.5 ✅ | Seller product API + images + price history + events | IDOR, `price.changed` emitted, seller-not-approved blocked |
+| P1.6 ✅ | Admin moderation API | transitions, reasons required |
+| P1.7 ✅ | Inventory domain + concurrency test | 50 parallel reserves on stock 1 → 1 success; movement sums |
+| P1.8 ✅ | Public catalog + search API | only active products, cursor paging, fulltext, no private fields (contract test) |
+| P1.9 ✅ | Frontend: seller center + admin queues | component tests, a11y basics |
+| P1.10 ✅ | Frontend: buyer catalog pages + E2E journey | seller creates → admin approves → buyer finds and views |
 
 Coverage: catalog/inventory/KYC domain code ≥ 95% line, others ≥ 85%.
 

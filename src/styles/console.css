@@ -34,3 +34,14 @@
   .console-scrim, .console-menu { display: none; }
   .console-content { padding: 2rem 2rem 4rem; }
 }
+
+/* ---------- Seller product screens ---------- */
+.cell-input { width: 100%; min-width: 6rem; min-height: 38px; padding: 0 0.6rem; border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--surface); color: var(--ink); font: inherit; }
+.cell-input:disabled { background: var(--surface-2); color: var(--muted); }
+.option-row { display: grid; gap: 0.75rem; align-items: end; grid-template-columns: 1fr; }
+@media (min-width: 760px) { .option-row { grid-template-columns: 1fr 2fr auto; } }
+.photo-list { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 1rem; }
+.photo-list li { display: grid; gap: 0.4rem; justify-items: start; }
+.photo-list img { width: 112px; height: 112px; object-fit: cover; border-radius: var(--radius-sm); background: var(--surface-2); }
+.button-row { display: flex; flex-wrap: wrap; gap: 0.75rem; }
+.stack > .card.stack, .card.stack { display: grid; gap: 1rem; }

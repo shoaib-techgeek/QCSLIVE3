@@ -19,6 +19,13 @@ const schema = z.object({
   // `s3` is reserved for the production adapter, which is not built yet.
   STORAGE_DRIVER: z.enum(['local', 'memory', 's3']).default('local'),
   STORAGE_DIR: z.string().min(1).default('./storage'),
+  // Catalogue settings (business constants live in config, not code). The variant limits are starting values to confirm.
+  PLATFORM_CURRENCY: z.string().regex(/^[A-Z]{3}$/).default('PKR'),
+  CATALOG_MAX_OPTIONS: z.coerce.number().int().min(1).default(3),
+  CATALOG_MAX_VALUES_PER_OPTION: z.coerce.number().int().min(1).default(20),
+  CATALOG_MAX_VARIANTS: z.coerce.number().int().min(1).default(100),
+  CATALOG_MAX_IMAGES: z.coerce.number().int().min(1).default(8),
+  CART_MAX_QTY: z.coerce.number().int().min(1).default(10), // per item; confirm the value
   AUTH_RATE_LIMIT_MAX: z.coerce.number().int().min(1).default(10),
 });
 

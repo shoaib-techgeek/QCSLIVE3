@@ -19,8 +19,15 @@ import { registerKycRoutes } from './modules/seller/kyc.routes.js';
 import { assignRole } from './modules/identity/identity.repository.js';
 import multipart from '@fastify/multipart';
 import { Aes256GcmEncryptor, parseEncryptionKey, type Encryptor } from './shared/encryptor.js';
-import { LocalFileStorage, MemoryFileStorage, type FileStorage } from './shared/file-storage.js';
-import { MAX_FILE_BYTES } from './modules/seller/kyc-schemas.js';
+import { LocalFileStorage, MAX_UPLOAD_BYTES, MemoryFileStorage, type FileStorage } from './shared/file-storage.js';
+
+import { CatalogService } from './modules/catalog/catalog.service.js';
+import { registerCatalogRoutes } from './modules/catalog/catalog.routes.js';
+import { registerPublicCatalogRoutes } from './modules/catalog/public.routes.js';
+import { InventoryService } from './modules/inventory/inventory.service.js';
+import { registerInventoryRoutes } from './modules/inventory/inventory.routes.js';
+import { CartService } from './modules/cart/cart.service.js';
+import { registerCartRoutes } from './modules/cart/cart.routes.js';
 
 export interface AppDeps {
   env: Env;
@@ -56,7 +63,7 @@ export async function buildApp({ env, db, mailer, storage, encryptor }: AppDeps)
   await app.register(helmet);
   await app.register(rateLimit, { max: 300, timeWindow: '1 minute' });
   await app.register(cookie);
-  await app.register(multipart, { limits: { fileSize: MAX_FILE_BYTES, files: 1, fields: 5 } });
+  await app.register(multipart, { limits: { fileSize: MAX_UPLOAD_BYTES, files: 1, fields: 5 } });
 
   app.addHook('onSend', async (req, reply) => {
     reply.header('x-request-id', req.id);
@@ -102,8 +109,28 @@ export async function buildApp({ env, db, mailer, storage, encryptor }: AppDeps)
 
   registerHealthRoutes(app, db);
   registerIdentityRoutes(app, authService, env);
-  registerSellerRoutes(app, new SellerService(db));
-  registerKycRoutes(app, new KycService(db, storage ?? defaultStorage(env), encryptor ?? defaultEncryptor(env), assignRole));
+  const sellerService = new SellerService(db);
+  registerSellerRoutes(app, sellerService);
+  const fileStorage = storage ?? defaultStorage(env);
+  const catalogConfig = {
+    platformCurrency: env.PLATFORM_CURRENCY, maxOptions: env.CATALOG_MAX_OPTIONS, maxValuesPerOption: env.CATALOG_MAX_VALUES_PER_OPTION,
+    maxVariants: env.CATALOG_MAX_VARIANTS, maxImages: env.CATALOG_MAX_IMAGES,
+  };
+  // Modules are wired together here and nowhere else: each is handed only the functions it may call on its neighbours.
+  let catalogService: CatalogService;
+  const inventoryService = new InventoryService(db, undefined, (ids) => catalogService.skuIdsByPublicId(ids));
+  catalogService = new CatalogService(
+    db, fileStorage, (userId) => sellerService.lookup(userId), catalogConfig, (ids) => sellerService.storeNames(ids), () => sellerService.nonActiveIds(), (ids) => inventoryService.stockFor(ids),
+  );
+  registerCatalogRoutes(app, catalogService);
+  registerPublicCatalogRoutes(app, catalogService);
+  registerInventoryRoutes(app, inventoryService, (req, skuId) =>
+    catalogService.ownSku({ userId: req.auth!.userId, publicId: req.auth!.publicId, requestId: req.id }, skuId));
+  registerCartRoutes(app, new CartService(
+    db, (ids) => catalogService.skuInfoByIds(ids), (publicIds) => catalogService.skuIdsByPublicId(publicIds), (ids) => sellerService.storeNames(ids),
+    { maxQty: env.CART_MAX_QTY, currency: env.PLATFORM_CURRENCY },
+  ));
+  registerKycRoutes(app, new KycService(db, fileStorage, encryptor ?? defaultEncryptor(env), assignRole));
   return app;
 }
 

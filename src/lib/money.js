@@ -9,3 +9,18 @@ export function formatMoney(minor, currency = 'PKR', locale = 'en-PK') {
   })
   return fmt.format(minor / 10 ** exponent)
 }
+
+/** Parses what a person types ("1,299.50") into integer minor units without floats; null when it is not a valid amount. */
+export function parseMoney(input, exponent = 2) {
+  const clean = String(input).trim().replaceAll(',', '')
+  const m = /^(\d+)(?:\.(\d+))?$/.exec(clean)
+  if (!m || (m[2] ?? '').length > exponent) return null
+  const minor = Number(m[1]) * 10 ** exponent + Number((m[2] ?? '').padEnd(exponent, '0') || 0)
+  return Number.isSafeInteger(minor) ? minor : null
+}
+
+/** Minor units back to an editable string ("129950" -> "1299.5"). */
+export function toInputMoney(minor, exponent = 2) {
+  const s = String(minor).padStart(exponent + 1, '0')
+  return `${s.slice(0, -exponent)}.${s.slice(-exponent)}`.replace(/\.?0+$/, '')
+}

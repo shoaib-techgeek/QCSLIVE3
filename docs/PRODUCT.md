@@ -42,7 +42,7 @@ Gamification, mobile apps, multi-currency, multi-warehouse, AI recommendations, 
 | 2 | Currency | Money is always `(minor units, ISO 4217)`. Platform base currency = PKR (legal entity is in Pakistan; config, proposed — confirm). Seller sets price in base currency; buyer-facing display currency conversion is a later feature |
 | 3 | Payments | Behind a `PaymentGateway` interface. Adapters: **Fake** (default for dev/tests, no account needed), **Stripe** (test mode), **PayFast Pakistan** (local methods), **COD** |
 | 4 | Shipping | Seller ships. Seller enters courier + tracking; platform tracks status. Platform may add courier integrations later |
-| 5 | COD | Allowed in **Pakistan only** (country allow-list in config). Rs. 500 is recorded but unclear whether it is the COD fee or the minimum/maximum order value — see open question 2. Fraud rules apply (module 18) |
+| 5 | COD | Allowed in **Pakistan only** (country allow-list in config). Minimum order value for COD is Rs. 500 (answered 2026-11-09), no COD fee. Fraud rules apply (module 18) |
 | 6 | Pricing | Seller sets price. Platform commission is **10%** of the item price (deducted from the seller on settlement; config, can be overridden per category later). Optional markup/floor is config and off by default |
 | 7 | Seller vetting | Required documents: CNIC, business address, pictures, business registration document, VAT/tax number and its document. Reviewed by admin. Soft policy: an unverified seller can list in draft; publishing and payouts unlock on approval; admin can approve with conditions |
 | 8 | Payout | Seller earnings release **15 days after delivery** (covers the 14-day return window). Config value |
@@ -54,8 +54,11 @@ Gamification, mobile apps, multi-currency, multi-warehouse, AI recommendations, 
 - **Stripe** test mode needs a free account (test keys) but no business verification. **Live Stripe requires a business in a Stripe-supported country; Pakistan is not one.** Decide the legal entity/country before go-live.
 - Until accounts exist, everything is built and tested with the Fake gateway; no external call is required for P2.
 
+## P2 decisions (answered 2026-11-09)
+Signed-in buyers only (no guest cart). Delivery in Pakistan only. COD allowed with a **minimum order of Rs. 500** and no fee. Sellers set one flat shipping fee for their store. No tax in P2. Details in `docs/design/P2-cart-checkout-orders.md`.
+
 ## Still open
-1. Rs. 500 for COD: fee, minimum order, or maximum order? (blocks 09/10 COD rules)
+1. ~~Rs. 500 for COD~~ answered: minimum order value.
 2. Confirm PKR as base currency, and what international (non-Pakistan) buyers pay with: Stripe live is not available to a Pakistan entity, so options are PayFast cards only, or a Stripe-supported entity abroad.
 3. Does the seller need to be Pakistan-based, or can foreign sellers join? (changes KYC documents and payouts)
 4. Tax: is VAT/sales tax charged to buyers, and who collects it?

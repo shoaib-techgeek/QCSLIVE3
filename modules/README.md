@@ -15,10 +15,10 @@ Phases and exit checks are in [docs/PRODUCT.md](../docs/PRODUCT.md).
 | 02 | [Shared kernel](02-shared-kernel.md) | Partial | `AppError`, audit, `Mailer`/`LogMailer` exist. `Money`, `Clock`, outbox table, helpers and relay worker added. Missing: pagination, idempotency middleware, settings service |
 | 03 | [Identity and auth](03-identity-auth.md) | Partial | Email+password, sessions, reset, lockout, `/me`, RBAC guard done. **Diverges from guide**: no OTP, social login, 2FA, addresses |
 | 04 | [Seller onboarding](04-seller-onboarding.md) | In progress | Seller profile, KYC documents/details, submit, admin review and decisions done (P1.1-P1.3, backend + UI). Missing: bank accounts, staff, public store page, production file storage |
-| 05 | [Catalog](05-catalog.md) | Not started | |
-| 06 | [Inventory](06-inventory.md) | Not started | |
-| 07 | [Search](07-search.md) | Not started | |
-| 08 | [Cart](08-cart.md) | Not started | |
+| 05 | [Catalog](05-catalog.md) | In progress | P1.4-P1.6 done: schema, state machine, variants, prices, seller product API, images, admin moderation API. Public catalogue/search API and seller + admin screens done (P1.8-P1.10). Missing: bulk import, SEO/sitemap, rich media, brands |
+| 06 | [Inventory](06-inventory.md) | In progress | P1.7 done: stock, reserve/release/commit, expiry, ledger, seller stock endpoint. Missing: order/payment event consumers (P2), bulk update, low-stock alerts, seller stock screen, flash-sale mode |
+| 07 | [Search](07-search.md) | Partial | MySQL fulltext + substring search with filters and sort via `/api/v1/products`. Missing: facets, typo tolerance, search engine |
+| 08 | [Cart](08-cart.md) | Partial | P2.1 done: signed-in cart with revalidation, API + pages. Missing: guest cart and merge (not planned), save for later, promotions and shipping previews, abandonment event |
 | 09 | [Checkout and orders](09-checkout-orders.md) | Not started | |
 | 10 | [Payments](10-payments.md) | Not started | |
 | 11 | [Ledger and finance](11-ledger-finance.md) | Not started | |
@@ -31,7 +31,7 @@ Phases and exit checks are in [docs/PRODUCT.md](../docs/PRODUCT.md).
 | 18 | [Fraud](18-fraud.md) | Not started | |
 | 19 | [Admin console](19-admin-console.md) | Partial | UI shell only |
 | 20 | [Seller center](20-seller-center.md) | Partial | UI shell only |
-| 21 | [Buyer web and mobile](21-buyer-web-and-mobile.md) | Partial | Auth pages, design system, `ProductCard`. No catalog pages |
+| 21 | [Buyer web and mobile](21-buyer-web-and-mobile.md) | Partial | Auth pages, design system, home, search, category and product pages on the live catalogue. No cart yet |
 | 22 | [Analytics](22-analytics.md) | Not started | |
 | 23 | [Release and operations](23-release-and-operations.md) | Not started | |
 

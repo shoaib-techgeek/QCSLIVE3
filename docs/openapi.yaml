@@ -219,6 +219,248 @@ paths:
         '403': { $ref: '#/components/responses/Error' }
         '404': { $ref: '#/components/responses/Error' }
         '409': { $ref: '#/components/responses/Error' }
+  /api/v1/seller/products:
+    get:
+      summary: Your products, newest first (deleted ones are hidden)
+      parameters:
+        - { name: status, in: query, schema: { type: string, enum: [draft, pending, active, inactive, rejected, banned] } }
+        - { name: cursor, in: query, schema: { type: integer } }
+        - { name: limit, in: query, schema: { type: integer, minimum: 1, maximum: 100, default: 25 } }
+      responses:
+        '200': { description: Page, content: { application/json: { schema: { $ref: '#/components/schemas/ProductPage' } } } }
+        '401': { $ref: '#/components/responses/Error' }
+        '404': { $ref: '#/components/responses/Error' }
+    post:
+      summary: Create a draft product with its options and one priced SKU per variant
+      description: |
+        Drafting is allowed before KYC approval. Prices are integer minor units in the platform currency; the client never sends a currency or status.
+        `skus` must cover every combination of `options` exactly once (a product without options has one SKU with empty `options`).
+        Errors: 400 VALIDATION_ERROR, 409 SKU_CODE_TAKEN, 404 SELLER_NOT_FOUND.
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/CreateProduct' } } } }
+      responses:
+        '201': { description: Created, content: { application/json: { schema: { $ref: '#/components/schemas/ProductEnvelope' } } } }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '404': { $ref: '#/components/responses/Error' }
+        '409': { $ref: '#/components/responses/Error' }
+  /api/v1/seller/products/{productId}:
+    parameters:
+      - { name: productId, in: path, required: true, schema: { type: string, format: uuid } }
+    get:
+      summary: One of your products (404 for anyone else's)
+      responses:
+        '200': { description: Product, content: { application/json: { schema: { $ref: '#/components/schemas/ProductEnvelope' } } } }
+        '404': { $ref: '#/components/responses/Error' }
+    patch:
+      summary: Edit a product
+      description: |
+        title, description and category only while draft, rejected or inactive (otherwise 409 PRODUCT_LOCKED). SKU price and active changes are also allowed
+        while active. A changed price writes price history and emits `price.changed`. Status, slug and seller cannot be set.
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/UpdateProduct' } } } }
+      responses:
+        '200': { description: Updated, content: { application/json: { schema: { $ref: '#/components/schemas/ProductEnvelope' } } } }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '404': { $ref: '#/components/responses/Error' }
+        '409': { $ref: '#/components/responses/Error' }
+    delete:
+      summary: Delete a draft, rejected or inactive product (it is hidden, not erased)
+      responses:
+        '204': { description: Deleted }
+        '404': { $ref: '#/components/responses/Error' }
+        '409': { $ref: '#/components/responses/Error' }
+  /api/v1/seller/products/{productId}/submit:
+    post:
+      summary: Send a draft or rejected product for review
+      description: Needs an approved seller (403 SELLER_NOT_APPROVED otherwise). Status becomes pending; emits product.submitted and product.status_changed.
+      parameters: [{ name: productId, in: path, required: true, schema: { type: string, format: uuid } }]
+      responses:
+        '200': { description: Submitted, content: { application/json: { schema: { $ref: '#/components/schemas/ProductEnvelope' } } } }
+        '403': { $ref: '#/components/responses/Error' }
+        '404': { $ref: '#/components/responses/Error' }
+        '409': { description: PRODUCT_INVALID_TRANSITION, content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } } }
+  /api/v1/seller/products/{productId}/deactivate:
+    post:
+      summary: Hide an active product from the store
+      parameters: [{ name: productId, in: path, required: true, schema: { type: string, format: uuid } }]
+      responses:
+        '200': { description: Deactivated, content: { application/json: { schema: { $ref: '#/components/schemas/ProductEnvelope' } } } }
+        '404': { $ref: '#/components/responses/Error' }
+        '409': { $ref: '#/components/responses/Error' }
+  /api/v1/seller/products/{productId}/activate:
+    post:
+      summary: Show an inactive product in the store again (approved sellers only)
+      parameters: [{ name: productId, in: path, required: true, schema: { type: string, format: uuid } }]
+      responses:
+        '200': { description: Activated, content: { application/json: { schema: { $ref: '#/components/schemas/ProductEnvelope' } } } }
+        '403': { $ref: '#/components/responses/Error' }
+        '404': { $ref: '#/components/responses/Error' }
+        '409': { $ref: '#/components/responses/Error' }
+  /api/v1/seller/products/{productId}/images:
+    post:
+      summary: Upload a product image (JPG, PNG or WebP, max 5 MB, at most 8 per product)
+      description: multipart/form-data. Send the optional `altText` field before the `file` part. Only while draft, rejected or inactive.
+      parameters: [{ name: productId, in: path, required: true, schema: { type: string, format: uuid } }]
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file]
+              properties:
+                altText: { type: string, maxLength: 200 }
+                file: { type: string, format: binary }
+      responses:
+        '201': { description: Stored, content: { application/json: { schema: { type: object, properties: { image: { $ref: '#/components/schemas/ProductImage' } } } } } }
+        '400': { description: FILE_TYPE_NOT_ALLOWED or TOO_MANY_FILES, content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } } }
+        '404': { $ref: '#/components/responses/Error' }
+        '409': { $ref: '#/components/responses/Error' }
+        '413': { description: FILE_TOO_LARGE, content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } } }
+  /api/v1/seller/products/{productId}/images/{imageId}:
+    delete:
+      summary: Remove one of your product images
+      parameters:
+        - { name: productId, in: path, required: true, schema: { type: string, format: uuid } }
+        - { name: imageId, in: path, required: true, schema: { type: string, format: uuid } }
+      responses:
+        '204': { description: Removed }
+        '404': { $ref: '#/components/responses/Error' }
+        '409': { $ref: '#/components/responses/Error' }
+  /api/v1/media/products/{imageId}:
+    get:
+      summary: A product image
+      description: Public for active products (cacheable). Owners and product reviewers can preview images of products that are not live (private, not cached). Anything else is 404.
+      security: []
+      parameters: [{ name: imageId, in: path, required: true, schema: { type: string, format: uuid } }]
+      responses:
+        '200': { description: Image bytes, content: { image/png: {}, image/jpeg: {}, image/webp: {} } }
+        '404': { $ref: '#/components/responses/Error' }
+  /api/v1/admin/products:
+    get:
+      summary: Product review queue (permission product:moderate), oldest first
+      parameters:
+        - { name: status, in: query, schema: { type: string, enum: [pending, active, inactive, rejected, banned], default: pending } }
+        - { name: cursor, in: query, schema: { type: integer } }
+        - { name: limit, in: query, schema: { type: integer, minimum: 1, maximum: 100, default: 25 } }
+      responses:
+        '200': { description: Page, content: { application/json: { schema: { $ref: '#/components/schemas/AdminProductPage' } } } }
+        '401': { $ref: '#/components/responses/Error' }
+        '403': { $ref: '#/components/responses/Error' }
+  /api/v1/admin/products/{productId}:
+    get:
+      summary: Full product for review, with the store name and status history
+      parameters: [{ name: productId, in: path, required: true, schema: { type: string, format: uuid } }]
+      responses:
+        '200': { description: Product, content: { application/json: { schema: { type: object, properties: { product: { $ref: '#/components/schemas/Product' } } } } } }
+        '403': { $ref: '#/components/responses/Error' }
+        '404': { $ref: '#/components/responses/Error' }
+  /api/v1/admin/products/{productId}/moderate:
+    post:
+      summary: Decide on a product
+      description: |
+        approve (pending -> active), reject (pending -> rejected), ban (pending, active or inactive -> banned), deactivate (active -> inactive).
+        A reason is required for everything except approve and is shown to the seller. A banned product stays banned.
+        Invalid moves are 409 PRODUCT_INVALID_TRANSITION.
+      parameters: [{ name: productId, in: path, required: true, schema: { type: string, format: uuid } }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/ModerateProduct' } } } }
+      responses:
+        '200': { description: Decided, content: { application/json: { schema: { type: object, properties: { product: { $ref: '#/components/schemas/Product' } } } } } }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '403': { $ref: '#/components/responses/Error' }
+        '404': { $ref: '#/components/responses/Error' }
+        '409': { $ref: '#/components/responses/Error' }
+  /api/v1/seller/skus/{skuId}/stock:
+    put:
+      summary: Set the units on hand for one of your SKUs
+      description: |
+        Sets the shelf count (not a delta). It cannot go below the units already reserved for open orders (409 BELOW_RESERVED).
+        Every change is recorded in an append-only stock ledger with your account and the optional note.
+        Another seller's SKU is 404.
+      parameters: [{ name: skuId, in: path, required: true, schema: { type: string, format: uuid } }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/SetStock' } } } }
+      responses:
+        '200': { description: Updated, content: { application/json: { schema: { type: object, properties: { stock: { $ref: '#/components/schemas/Stock' } } } } } }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Error' }
+        '404': { $ref: '#/components/responses/Error' }
+        '409': { $ref: '#/components/responses/Error' }
+  /api/v1/categories:
+    get:
+      summary: Active categories in display order
+      security: []
+      responses:
+        '200': { description: Categories, content: { application/json: { schema: { type: object, properties: { items: { type: array, items: { $ref: '#/components/schemas/CategoryRef' } } } } } } }
+  /api/v1/products:
+    get:
+      summary: Live products (search, filter, sort)
+      description: |
+        Only active products from active sellers with at least one active SKU. `q` searches title and description. Default order is newest first
+        (relevance when `q` is set). `minPrice` and `maxPrice` compare against the lowest SKU price, in minor units. `nextCursor` is opaque: pass it back unchanged.
+        Browsers always revalidate (a hidden product disappears on the next load); shared caches may keep a response for 60 seconds. Responses never include seller codes, stock numbers or internal ids.
+      security: []
+      parameters:
+        - { name: q, in: query, schema: { type: string, maxLength: 100 } }
+        - { name: category, in: query, schema: { type: string } }
+        - { name: minPrice, in: query, schema: { type: integer, minimum: 0 } }
+        - { name: maxPrice, in: query, schema: { type: integer, minimum: 0 } }
+        - { name: sort, in: query, schema: { type: string, enum: [relevance, newest, price_asc, price_desc] } }
+        - { name: cursor, in: query, schema: { type: string } }
+        - { name: limit, in: query, schema: { type: integer, minimum: 1, maximum: 100, default: 24 } }
+      responses:
+        '200': { description: Page, content: { application/json: { schema: { $ref: '#/components/schemas/PublicProductPage' } } } }
+        '400': { $ref: '#/components/responses/ValidationError' }
+  /api/v1/products/{slug}:
+    get:
+      summary: One live product
+      security: []
+      parameters: [{ name: slug, in: path, required: true, schema: { type: string } }]
+      responses:
+        '200': { description: Product, content: { application/json: { schema: { type: object, properties: { product: { $ref: '#/components/schemas/PublicProduct' } } } } } }
+        '404': { $ref: '#/components/responses/Error' }
+  /api/v1/stores/{slug}:
+    get:
+      summary: Public store page (active stores only)
+      security: []
+      parameters: [{ name: slug, in: path, required: true, schema: { type: string } }]
+      responses:
+        '200': { description: Store, content: { application/json: { schema: { type: object, properties: { store: { $ref: '#/components/schemas/PublicStore' } } } } } }
+        '404': { $ref: '#/components/responses/Error' }
+  /api/v1/cart:
+    get:
+      summary: Your cart, grouped by store and revalidated against the catalogue
+      description: |
+        Prices, availability and product status are recomputed on every read; nothing stored in the cart is trusted for money.
+        `changes` lists what the buyer should notice: PRICE_CHANGED, UNAVAILABLE, OUT_OF_STOCK, QTY_EXCEEDS_STOCK.
+        `summary` counts only selected items that can be bought right now. Never cached.
+      responses:
+        '200': { description: Cart, content: { application/json: { schema: { $ref: '#/components/schemas/Cart' } } } }
+        '401': { $ref: '#/components/responses/Error' }
+  /api/v1/cart/items:
+    post:
+      summary: Add an item (adds to the quantity if it is already there)
+      description: Errors - 404 when the item is not on sale, 409 QTY_LIMIT (per-item maximum) or OUT_OF_STOCK (not enough units).
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/AddCartItem' } } } }
+      responses:
+        '201': { description: Updated cart, content: { application/json: { schema: { $ref: '#/components/schemas/Cart' } } } }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Error' }
+        '404': { $ref: '#/components/responses/Error' }
+        '409': { $ref: '#/components/responses/Error' }
+  /api/v1/cart/items/{itemId}:
+    patch:
+      summary: Change quantity or selection, or accept a new price
+      parameters: [{ name: itemId, in: path, required: true, schema: { type: string, format: uuid } }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/UpdateCartItem' } } } }
+      responses:
+        '200': { description: Updated cart, content: { application/json: { schema: { $ref: '#/components/schemas/Cart' } } } }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '404': { description: Not in your cart, content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } } }
+        '409': { $ref: '#/components/responses/Error' }
+    delete:
+      summary: Remove an item
+      parameters: [{ name: itemId, in: path, required: true, schema: { type: string, format: uuid } }]
+      responses:
+        '204': { description: Removed }
+        '404': { $ref: '#/components/responses/Error' }
 security:
   - sessionCookie: []
 components:
@@ -343,3 +585,239 @@ components:
               submittedAt: { type: [string, 'null'], format: date-time }
               flags: { type: array, items: { type: string } }
         nextCursor: { type: [integer, 'null'] }
+    ProductImage:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        url: { type: string }
+        altText: { type: [string, 'null'] }
+        position: { type: integer }
+    ProductOption:
+      type: object
+      required: [name, values]
+      properties:
+        name: { type: string, maxLength: 60 }
+        values: { type: array, items: { type: string, maxLength: 60 } }
+    CreateProduct:
+      type: object
+      additionalProperties: false
+      required: [title, categorySlug, skus]
+      properties:
+        title: { type: string, minLength: 1, maxLength: 200 }
+        description: { type: string, maxLength: 5000, description: Plain text only }
+        categorySlug: { type: string }
+        options: { type: array, items: { $ref: '#/components/schemas/ProductOption' } }
+        skus:
+          type: array
+          minItems: 1
+          items:
+            type: object
+            additionalProperties: false
+            required: [sellerSku, priceMinor]
+            properties:
+              sellerSku: { type: string, pattern: '^[A-Za-z0-9._-]{1,64}$' }
+              options: { type: object, additionalProperties: { type: string } }
+              priceMinor: { type: integer, minimum: 1, description: Minor units in the platform currency }
+              compareAtMinor: { type: integer, description: Original price; must be higher than priceMinor }
+    UpdateProduct:
+      type: object
+      additionalProperties: false
+      minProperties: 1
+      properties:
+        title: { type: string, minLength: 1, maxLength: 200 }
+        description: { type: [string, 'null'], maxLength: 5000 }
+        categorySlug: { type: string }
+        skus:
+          type: array
+          minItems: 1
+          items:
+            type: object
+            additionalProperties: false
+            required: [id]
+            properties:
+              id: { type: string, format: uuid }
+              priceMinor: { type: integer, minimum: 1 }
+              compareAtMinor: { type: [integer, 'null'] }
+              active: { type: boolean }
+    Sku:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        sellerSku: { type: string }
+        options: { type: object, additionalProperties: { type: string } }
+        priceMinor: { type: integer }
+        compareAtMinor: { type: [integer, 'null'] }
+        currency: { type: string }
+        active: { type: boolean }
+        stock: { $ref: '#/components/schemas/Stock' }
+    Product:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        title: { type: string }
+        slug: { type: string }
+        description: { type: [string, 'null'] }
+        status: { type: string, enum: [draft, pending, active, inactive, rejected, banned] }
+        rejectionReason: { type: [string, 'null'] }
+        category: { type: [object, 'null'], properties: { slug: { type: string }, name: { type: string } } }
+        options: { type: array, items: { $ref: '#/components/schemas/ProductOption' } }
+        skus: { type: array, items: { $ref: '#/components/schemas/Sku' } }
+        images: { type: array, items: { $ref: '#/components/schemas/ProductImage' } }
+    ProductEnvelope: { type: object, properties: { product: { $ref: '#/components/schemas/Product' } } }
+    ProductPage:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              id: { type: string, format: uuid }
+              title: { type: string }
+              slug: { type: string }
+              status: { type: string }
+              priceFromMinor: { type: [integer, 'null'] }
+              currency: { type: [string, 'null'] }
+              imageUrl: { type: [string, 'null'] }
+        nextCursor: { type: [integer, 'null'] }
+    ModerateProduct:
+      type: object
+      additionalProperties: false
+      required: [decision]
+      properties:
+        decision: { type: string, enum: [approve, reject, ban, deactivate] }
+        reason: { type: string, maxLength: 1000 }
+    AdminProductPage:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              id: { type: string, format: uuid }
+              title: { type: string }
+              status: { type: string }
+              storeName: { type: [string, 'null'] }
+              submittedAt: { type: string, format: date-time }
+              priceFromMinor: { type: [integer, 'null'] }
+              currency: { type: [string, 'null'] }
+              imageCount: { type: integer }
+        nextCursor: { type: [integer, 'null'] }
+    Stock:
+      type: object
+      properties:
+        onHand: { type: integer, minimum: 0 }
+        reserved: { type: integer, minimum: 0, description: Held for open orders }
+        available: { type: integer, minimum: 0, description: onHand minus reserved }
+    SetStock:
+      type: object
+      additionalProperties: false
+      required: [onHand]
+      properties:
+        onHand: { type: integer, minimum: 0, maximum: 2147483647 }
+        note: { type: string, maxLength: 200 }
+    CategoryRef:
+      type: object
+      properties: { slug: { type: string }, name: { type: string } }
+    PublicStore:
+      type: object
+      properties: { name: { type: string }, slug: { type: string }, description: { type: [string, 'null'] } }
+    PublicProductPage:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              id: { type: string, format: uuid }
+              title: { type: string }
+              slug: { type: string }
+              priceMinor: { type: integer, description: Lowest active SKU price }
+              compareAtMinor: { type: [integer, 'null'] }
+              currency: { type: string }
+              imageUrl: { type: [string, 'null'] }
+              category: { $ref: '#/components/schemas/CategoryRef' }
+              storeName: { type: [string, 'null'] }
+              inStock: { type: boolean }
+        nextCursor: { type: [string, 'null'] }
+    PublicProduct:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        title: { type: string }
+        slug: { type: string }
+        description: { type: [string, 'null'] }
+        category: { $ref: '#/components/schemas/CategoryRef' }
+        store: { type: object, properties: { name: { type: [string, 'null'] } } }
+        options: { type: array, items: { $ref: '#/components/schemas/ProductOption' } }
+        skus:
+          type: array
+          items:
+            type: object
+            properties:
+              id: { type: string, format: uuid }
+              options: { type: object, additionalProperties: { type: string } }
+              priceMinor: { type: integer }
+              compareAtMinor: { type: [integer, 'null'] }
+              currency: { type: string }
+              inStock: { type: boolean }
+        images:
+          type: array
+          items: { type: object, properties: { url: { type: string }, altText: { type: [string, 'null'] } } }
+    AddCartItem:
+      type: object
+      additionalProperties: false
+      required: [skuId, qty]
+      properties:
+        skuId: { type: string, format: uuid }
+        qty: { type: integer, minimum: 1 }
+    UpdateCartItem:
+      type: object
+      additionalProperties: false
+      minProperties: 1
+      properties:
+        qty: { type: integer, minimum: 1 }
+        selected: { type: boolean }
+        acceptPrice: { type: boolean, enum: [true], description: Take the current price as the one the buyer has seen }
+    CartChange:
+      type: object
+      required: [code]
+      properties:
+        code: { type: string, enum: [PRICE_CHANGED, UNAVAILABLE, OUT_OF_STOCK, QTY_EXCEEDS_STOCK] }
+        oldMinor: { type: integer }
+        newMinor: { type: integer }
+        available: { type: integer }
+    Cart:
+      type: object
+      properties:
+        groups:
+          type: array
+          items:
+            type: object
+            properties:
+              storeName: { type: string }
+              subtotalMinor: { type: integer, description: Selected items that can be bought now }
+              items:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id: { type: string, format: uuid }
+                    selected: { type: boolean }
+                    qty: { type: integer }
+                    priceMinor: { type: integer, description: Current price, recomputed on read }
+                    compareAtMinor: { type: [integer, 'null'] }
+                    currency: { type: string }
+                    lineTotalMinor: { type: integer }
+                    available: { type: [integer, 'null'] }
+                    product: { type: object, properties: { title: { type: string }, slug: { type: [string, 'null'] }, imageUrl: { type: [string, 'null'] } } }
+                    sku: { type: object, properties: { id: { type: [string, 'null'] }, options: { type: object, additionalProperties: { type: string } } } }
+                    changes: { type: array, items: { $ref: '#/components/schemas/CartChange' } }
+        summary:
+          type: object
+          properties: { itemCount: { type: integer }, subtotalMinor: { type: integer }, currency: { type: string } }
+        changes:
+          type: array
+          items: { allOf: [{ $ref: '#/components/schemas/CartChange' }, { type: object, properties: { itemId: { type: string } } }] }

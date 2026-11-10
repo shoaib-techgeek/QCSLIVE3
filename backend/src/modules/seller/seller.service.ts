@@ -54,6 +54,29 @@ export class SellerService {
     return this.mine(actor.userId);
   }
 
+  /** Minimal internal view for other modules (catalog): who the seller is and whether KYC allows publishing. */
+  async lookup(userId: number): Promise<{ id: number; publicId: string; kycStatus: string } | null> {
+    const s = await repo.findByUserId(this.db, userId);
+    return s ? { id: s.id, publicId: s.public_id, kycStatus: s.kyc_status } : null;
+  }
+
+  /** Public store page: only active stores, and only what a shopper may see. */
+  async publicBySlug(slug: string): Promise<{ name: string; slug: string; description: string | null }> {
+    const s = await repo.findActiveBySlug(this.db, slug);
+    if (!s) throw new AppError(404, 'NOT_FOUND', 'Resource not found.');
+    return { name: s.store_name, slug: s.slug, description: s.description };
+  }
+
+  /** Sellers whose products must not be shown (suspended or closed). */
+  nonActiveIds(): Promise<number[]> {
+    return repo.nonActiveIds(this.db);
+  }
+
+  /** Store names for other modules' admin screens. */
+  storeNames(ids: number[]): Promise<Map<number, string>> {
+    return repo.namesByIds(this.db, [...new Set(ids)]);
+  }
+
   async mine(userId: number): Promise<SellerView> {
     const seller = await repo.findByUserId(this.db, userId);
     if (!seller) throw new AppError(404, 'SELLER_NOT_FOUND', 'You do not have a store yet.');
