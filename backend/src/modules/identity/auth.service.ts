@@ -7,6 +7,7 @@ import type { Mailer } from '../../shared/mailer.js';
 import { hashPassword, verifyPassword } from './password.js';
 import { generateToken, hashToken } from './tokens.js';
 import * as repo from './identity.repository.js';
+import type { GoogleVerifier } from './google-verifier.js';
 
 export const SESSION_TTL_MS = 7 * 24 * 3600 * 1000;
 const VERIFY_TTL_MS = 24 * 3600 * 1000;
@@ -44,7 +45,7 @@ const getDummyHash = () => (dummyHash ??= hashPassword('timing-equalisation-plac
 
 export class AuthService {
   constructor(
-    private readonly deps: { db: Knex; mailer: Mailer; env: Env },
+    private readonly deps: { db: Knex; mailer: Mailer; env: Env; googleVerifier: GoogleVerifier },
   ) {}
 
   private get db() {

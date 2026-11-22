@@ -66,4 +66,9 @@ describe('loadEnv storage and encryption', () => {
   it('defaults to local storage in development', () => {
     expect(loadEnv({ ...base }).STORAGE_DRIVER).toBe('local');
   });
+
+  it('treats an empty GOOGLE_CLIENT_ID as unset', () => {
+    expect(loadEnv({ ...base, GOOGLE_CLIENT_ID: '' }).GOOGLE_CLIENT_ID).toBeUndefined();
+    expect(loadEnv({ ...base, GOOGLE_CLIENT_ID: 'abc' }).GOOGLE_CLIENT_ID).toBe('abc');
+  });
 });

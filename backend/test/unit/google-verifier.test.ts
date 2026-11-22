@@ -1,0 +1,50 @@
+import { describe, expect, it } from 'vitest';
+import { SignJWT, exportJWK, generateKeyPair, createLocalJWKSet } from 'jose';
+import { JoseGoogleVerifier } from '../../src/modules/identity/google-verifier.js';
+
+const clientId = 'client-123.apps.googleusercontent.com';
+const ISS = 'https://accounts.google.com';
+
+async function setup() {
+  const { publicKey, privateKey } = await generateKeyPair('RS256');
+  const jwk = { ...(await exportJWK(publicKey)), kid: 'k1', alg: 'RS256', use: 'sig' };
+  const keys = createLocalJWKSet({ keys: [jwk] });
+  const sign = (claims: Record<string, unknown>, o: { iss?: string; aud?: string; exp?: string | number; key?: CryptoKey } = {}) =>
+    new SignJWT(claims)
+      .setProtectedHeader({ alg: 'RS256', kid: 'k1' })
+      .setIssuer(o.iss ?? ISS)
+      .setAudience(o.aud ?? clientId)
+      .setIssuedAt()
+      .setExpirationTime(o.exp ?? '5m')
+      .sign(o.key ?? privateKey);
+  return { verifier: new JoseGoogleVerifier({ clientId, keys }), sign };
+}
+
+describe('JoseGoogleVerifier', () => {
+  it('accepts a valid token and maps sub, email, email_verified, name', async () => {
+    const { verifier, sign } = await setup();
+    const token = await sign({ sub: 'g-1', email: 'a@b.co', email_verified: true, name: 'Ann' });
+    expect(await verifier.verify(token)).toEqual({ subject: 'g-1', email: 'a@b.co', emailVerified: true, name: 'Ann' });
+  });
+
+  it('rejects wrong audience', async () => {
+    const { verifier, sign } = await setup();
+    await expect(verifier.verify(await sign({ sub: 'x', email: 'a@b.co' }, { aud: 'other' }))).rejects.toMatchObject({ code: 'INVALID_GOOGLE_TOKEN', statusCode: 401 });
+  });
+
+  it('rejects wrong issuer', async () => {
+    const { verifier, sign } = await setup();
+    await expect(verifier.verify(await sign({ sub: 'x', email: 'a@b.co' }, { iss: 'https://evil.example' }))).rejects.toMatchObject({ code: 'INVALID_GOOGLE_TOKEN' });
+  });
+
+  it('rejects expired token', async () => {
+    const { verifier, sign } = await setup();
+    await expect(verifier.verify(await sign({ sub: 'x', email: 'a@b.co' }, { exp: Math.floor(Date.now() / 1000) - 60 }))).rejects.toMatchObject({ code: 'INVALID_GOOGLE_TOKEN' });
+  });
+
+  it('rejects a token signed by another key', async () => {
+    const { verifier, sign } = await setup();
+    const other = await generateKeyPair('RS256');
+    await expect(verifier.verify(await sign({ sub: 'x', email: 'a@b.co' }, { key: other.privateKey }))).rejects.toMatchObject({ code: 'INVALID_GOOGLE_TOKEN' });
+  });
+});

@@ -9,6 +9,7 @@ import type { Env } from './config/env.js';
 import { AppError } from './shared/errors.js';
 import { registerHealthRoutes } from './modules/health/health.routes.js';
 import { LogMailer, MemoryMailer, type Mailer } from './shared/mailer.js';
+import { DisabledGoogleVerifier, JoseGoogleVerifier, type GoogleVerifier } from './modules/identity/google-verifier.js';
 import { AuthService } from './modules/identity/auth.service.js';
 import { registerAuthGuard } from './modules/identity/auth.guard.js';
 import { registerIdentityRoutes } from './modules/identity/auth.routes.js';
@@ -35,9 +36,10 @@ export interface AppDeps {
   mailer?: Mailer;
   storage?: FileStorage;
   encryptor?: Encryptor;
+  googleVerifier?: GoogleVerifier;
 }
 
-export async function buildApp({ env, db, mailer, storage, encryptor }: AppDeps): Promise<FastifyInstance> {
+export async function buildApp({ env, db, mailer, storage, encryptor, googleVerifier }: AppDeps): Promise<FastifyInstance> {
   const app = Fastify({
     logger: {
       level: env.LOG_LEVEL,
@@ -104,6 +106,9 @@ export async function buildApp({ env, db, mailer, storage, encryptor }: AppDeps)
     db,
     env,
     mailer: mailer ?? (env.MAIL_DRIVER === 'memory' ? new MemoryMailer() : new LogMailer(app.log)),
+    googleVerifier:
+      googleVerifier ??
+      (env.GOOGLE_CLIENT_ID ? new JoseGoogleVerifier({ clientId: env.GOOGLE_CLIENT_ID }) : new DisabledGoogleVerifier()),
   });
   registerAuthGuard(app, authService);
 

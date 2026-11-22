@@ -26,6 +26,7 @@ const schema = z.object({
   CATALOG_MAX_VARIANTS: z.coerce.number().int().min(1).default(100),
   CATALOG_MAX_IMAGES: z.coerce.number().int().min(1).default(8),
   CART_MAX_QTY: z.coerce.number().int().min(1).default(10), // per item; confirm the value
+  GOOGLE_CLIENT_ID: z.preprocess((v) => (v === '' ? undefined : v), z.string().min(1).optional()),
   AUTH_RATE_LIMIT_MAX: z.coerce.number().int().min(1).default(10),
 });
 
