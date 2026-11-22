@@ -8,7 +8,7 @@ import AuthShell from '../components/AuthShell.jsx'
 function validateRegistration({ email, password }) {
   const errors = {}
   if (!/^\S+@\S+\.\S+$/.test(email.trim())) errors.email = 'Enter a valid email address.'
-  if (password.length < 10) errors.password = 'Password must be at least 10 characters.'
+  // if (password.length < 10) errors.password = 'Password must be at least 6 characters.'
   return errors
 }
 
@@ -71,6 +71,9 @@ export default function RegisterPage() {
       <h1>Create your account</h1>
       <form onSubmit={onSubmit} noValidate>
         <ErrorMessage>{formError}</ErrorMessage>
+
+
+        
         <Field label="Full name (optional)" autoComplete="name" value={form.fullName} onChange={set('fullName')} error={errors.fullName} />
         <Field label="Email" type="email" autoComplete="email" required value={form.email} onChange={set('email')} error={errors.email} />
         <Field

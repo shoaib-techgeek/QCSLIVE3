@@ -36,7 +36,7 @@ const COMMON = new Set([
 
 export const passwordSchema = z
   .string()
-  .min(10, 'Password must be at least 10 characters.')
+  .min(6, 'Password must be at least 6 characters.')
   .max(128, 'Password must be at most 128 characters.')
   .refine((v) => v.trim().length > 0, 'Password cannot be blank.')
   .refine((v) => !COMMON.has(v.toLowerCase()), 'Password is too common.');

@@ -57,10 +57,15 @@ function TrustBand() {
 /** Loads a product list once per category; returns { loading, items, error }. */
 function useProducts(params) {
   const key = JSON.stringify(params)
+  
   const [state, setState] = useState({ loading: true, items: [], error: '' })
+
   useEffect(() => {
+
     let cancelled = false
+    
     setState((s) => ({ ...s, loading: true, error: '' }))
+
     listProducts(params)
       .then((r) => !cancelled && setState({ loading: false, items: r.items, error: '' }))
       .catch((e) => !cancelled && setState({ loading: false, items: [], error: e.message }))
@@ -71,7 +76,9 @@ function useProducts(params) {
 }
 
 function NewIn() {
+  
   const { loading, items } = useProducts({ sort: 'newest', limit: 5 })
+
   if (loading || items.length === 0) return null
   return (
     <section className="home-section" id="new-in" aria-labelledby="new-in-title">
@@ -80,7 +87,12 @@ function NewIn() {
         <Link to="/search?sort=newest">See all</Link>
       </div>
       <div className="product-grid explore-grid">
-        {items.map((p) => <ProductCard key={p.id} {...cardProps(p)} />)}
+     
+
+        {
+        items.map((p) => 
+          <ProductCard key={p.id} {...cardProps(p)} 
+        />)}
       </div>
     </section>
   )

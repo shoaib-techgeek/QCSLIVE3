@@ -12,13 +12,17 @@ export default function ProductCard({ title, to, priceMinor, wasMinor, currency 
       <div className="product-media">
         {imageUrl ? <img src={imageUrl} alt="" loading="lazy" /> : <span className="tile tile-violet" style={{ width: '40%', height: '40%' }} aria-hidden="true" />}
       </div>
+
       {(flag || off > 0) && <span className="product-flag">{flag ?? `${off}% off`}</span>}
+     
       <div className="product-body">
         <h3 className="product-title"><Link to={to}>{title}</Link></h3>
+        
         <div className="product-price">
           <span className="price">{formatMoney(priceMinor, currency)}</span>
           {off > 0 && <span className="price-was"><span className="visually-hidden">Was </span>{formatMoney(wasMinor, currency)}</span>}
         </div>
+
         {(rating !== undefined || sold !== undefined) && (
           <div className="product-meta">
             {rating !== undefined && (
