@@ -21,6 +21,14 @@ describe('migrations', () => {
     expect(await db.schema.hasTable('audit_events')).toBe(true);
   });
 
+  it('user_identities migration goes up, down, up', async () => {
+    expect(await db.schema.hasTable('user_identities')).toBe(true);
+    await db.migrate.rollback(undefined, true);
+    expect(await db.schema.hasTable('user_identities')).toBe(false);
+    await db.migrate.latest();
+    expect(await db.schema.hasTable('user_identities')).toBe(true);
+  });
+
   it('only ever targets the test database', () => {
     expect(testEnv().DB_ACTIVE_NAME).toBe('marketplace_test');
   });

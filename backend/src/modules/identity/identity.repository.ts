@@ -9,7 +9,7 @@ export interface UserRow {
   id: number;
   public_id: string;
   email: string;
-  password_hash: string;
+  password_hash: string | null;
   full_name: string | null;
   phone: string | null;
   status: UserStatus;
@@ -32,7 +32,7 @@ export const findUserById = (db: Db, id: number): Promise<UserRow | undefined> =
 
 export async function insertUser(
   db: Db,
-  u: { publicId: string; email: string; passwordHash: string; fullName: string | null },
+  u: { publicId: string; email: string; passwordHash: string | null; fullName: string | null },
 ): Promise<number> {
   const [id] = await db('users').insert({
     public_id: u.publicId,
@@ -137,6 +137,18 @@ export const activateUser = (db: Db, userId: number, now: Date): Promise<unknown
   db('users')
     .where({ id: userId, status: 'pending_verification' })
     .update({ status: 'active', email_verified_at: now, updated_at: now });
+
+export const clearPasswordAndVerify = (db: Db, userId: number, now: Date): Promise<unknown> =>
+  db('users')
+    .where({ id: userId })
+    .update({ password_hash: null, email_verified_at: now, status: 'active', failed_login_count: 0, locked_until: null, updated_at: now });
+
+export const findIdentity = (db: Db, provider: 'google', subject: string): Promise<{ user_id: number } | undefined> =>
+  db('user_identities').where({ provider, provider_subject: subject }).first('user_id');
+
+export async function insertIdentity(db: Db, i: { userId: number; provider: 'google'; subject: string }): Promise<void> {
+  await db('user_identities').insert({ user_id: i.userId, provider: i.provider, provider_subject: i.subject });
+}
 
 export const setStatus = (db: Db, userId: number, status: UserStatus, now: Date): Promise<unknown> =>
   db('users').where({ id: userId }).update({ status, updated_at: now });
