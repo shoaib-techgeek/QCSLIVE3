@@ -5,6 +5,7 @@ import { loadEnv, type Env } from '../../src/config/env.js';
 import { createDb } from '../../src/db/knex.js';
 import { MemoryMailer } from '../../src/shared/mailer.js';
 import { MemoryFileStorage } from '../../src/shared/file-storage.js';
+import type { GoogleVerifier } from '../../src/modules/identity/google-verifier.js';
 
 export function testEnv(overrides: NodeJS.ProcessEnv = {}): Env {
   return loadEnv({
@@ -30,13 +31,16 @@ export interface TestContext {
 }
 
 /** Builds the app against the test database with all migrations applied. */
-export async function startTestApp(envOverrides: NodeJS.ProcessEnv = {}): Promise<TestContext> {
+export async function startTestApp(
+  envOverrides: NodeJS.ProcessEnv = {},
+  { googleVerifier }: { googleVerifier?: GoogleVerifier } = {},
+): Promise<TestContext> {
   const env = testEnv(envOverrides);
   const db = createDb(env);
   await db.migrate.latest();
   const mailer = new MemoryMailer();
   const storage = new MemoryFileStorage();
-  const app = await buildApp({ env, db, mailer, storage });
+  const app = await buildApp({ env, db, mailer, storage, googleVerifier });
   await app.ready();
   return { app, db, mailer, storage };
 }

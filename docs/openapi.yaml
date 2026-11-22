@@ -54,6 +54,22 @@ paths:
         '401': { $ref: '#/components/responses/Error' }
         '423': { $ref: '#/components/responses/Error' }
         '429': { $ref: '#/components/responses/Error' }
+  /api/v1/auth/oauth/google:
+    post:
+      summary: Sign in or sign up with a Google ID token; sets the `sid` cookie like /auth/login
+      description: |
+        Matches by Google subject, else links to the account with the same (verified) email, else
+        creates an active customer. Linking to an account whose email was never verified clears its
+        password and revokes its sessions.
+      security: []
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/GoogleLogin' } } } }
+      responses:
+        '200': { description: Signed in, content: { application/json: { schema: { $ref: '#/components/schemas/AccountEnvelope' } } } }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { description: INVALID_GOOGLE_TOKEN or GOOGLE_EMAIL_UNVERIFIED, content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } } }
+        '403': { description: ACCOUNT_DISABLED, content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } } }
+        '429': { $ref: '#/components/responses/Error' }
+        '503': { description: GOOGLE_SIGN_IN_DISABLED (no client id configured), content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } } }
   /api/v1/auth/logout:
     post:
       summary: Revoke the current session
@@ -496,6 +512,7 @@ components:
       properties: { verificationRequired: { type: boolean }, message: { type: string } }
     TokenBody: { type: object, required: [token], properties: { token: { type: string, minLength: 20, maxLength: 200 } } }
     Login: { type: object, required: [email, password], properties: { email: { type: string, format: email }, password: { type: string, maxLength: 128 } } }
+    GoogleLogin: { type: object, required: [idToken], properties: { idToken: { type: string, minLength: 20, maxLength: 4096 } } }
     ForgotPassword: { type: object, required: [email], properties: { email: { type: string, format: email } } }
     ResetPassword: { type: object, required: [token, password], properties: { token: { type: string }, password: { type: string } } }
     ChangePassword: { type: object, required: [currentPassword, newPassword], properties: { currentPassword: { type: string }, newPassword: { type: string } } }

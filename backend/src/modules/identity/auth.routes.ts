@@ -4,7 +4,7 @@ import { AppError } from '../../shared/errors.js';
 import { SESSION_COOKIE } from './auth.guard.js';
 import { SESSION_TTL_MS, type AuthService, type RequestContext } from './auth.service.js';
 import {
-  changePasswordSchema, forgotPasswordSchema, loginSchema, registerSchema,
+  changePasswordSchema, forgotPasswordSchema, googleLoginSchema, loginSchema, registerSchema,
   resetPasswordSchema, updateProfileSchema, verifyEmailSchema,
 } from './schemas.js';
 
@@ -16,6 +16,7 @@ const ctxOf = (req: FastifyRequest): RequestContext => ({
 
 export function registerIdentityRoutes(app: FastifyInstance, service: AuthService, env: Env): void {
   const cookieOpts = { httpOnly: true, secure: env.NODE_ENV === 'production', sameSite: 'lax' as const, path: '/' };
+  const sessionCookie = { ...cookieOpts, maxAge: SESSION_TTL_MS / 1000 };
   // Credential-handling routes get a tighter limit than the global one.
   const limited = { config: { rateLimit: { max: env.AUTH_RATE_LIMIT_MAX, timeWindow: '1 minute' } } };
   const auth = { preHandler: app.authz.requireAuth };
@@ -41,7 +42,14 @@ export function registerIdentityRoutes(app: FastifyInstance, service: AuthServic
   app.post('/api/v1/auth/login', limited, async (req, reply) => {
     const body = loginSchema.parse(req.body);
     const { token, account } = await service.login(body, ctxOf(req));
-    reply.setCookie(SESSION_COOKIE, token, { ...cookieOpts, maxAge: SESSION_TTL_MS / 1000 });
+    reply.setCookie(SESSION_COOKIE, token, sessionCookie);
+    return { account };
+  });
+
+  app.post('/api/v1/auth/oauth/google', limited, async (req, reply) => {
+    const { idToken } = googleLoginSchema.parse(req.body);
+    const { token, account } = await service.googleLogin(idToken, ctxOf(req));
+    reply.setCookie(SESSION_COOKIE, token, sessionCookie);
     return { account };
   });
 

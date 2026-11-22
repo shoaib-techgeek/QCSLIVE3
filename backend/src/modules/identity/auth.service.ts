@@ -7,7 +7,7 @@ import type { Mailer } from '../../shared/mailer.js';
 import { hashPassword, verifyPassword } from './password.js';
 import { generateToken, hashToken } from './tokens.js';
 import * as repo from './identity.repository.js';
-import type { GoogleVerifier } from './google-verifier.js';
+import type { GoogleProfile, GoogleVerifier } from './google-verifier.js';
 
 export const SESSION_TTL_MS = 7 * 24 * 3600 * 1000;
 const VERIFY_TTL_MS = 24 * 3600 * 1000;
@@ -148,13 +148,72 @@ export class AuthService {
       throw new AppError(403, 'ACCOUNT_DISABLED', 'This account is not available.');
     }
 
-    const { token, hash } = generateToken(); // fresh token every login: no session fixation
-    await this.db.transaction(async (trx) => {
-      await repo.resetLoginState(trx, user.id, now);
-      await repo.createSession(trx, { userId: user.id, tokenHash: hash, expiresAt: new Date(now.getTime() + SESSION_TTL_MS), ip: ctx.ip, userAgent: ctx.userAgent });
-      await recordAudit(trx, { actorId: user.public_id, action: 'auth.login', targetType: 'user', targetId: user.public_id, requestId: ctx.requestId });
-    });
+    const token = await this.db.transaction((trx) => this.issueSession(trx, user, 'auth.login', ctx, now));
     return { token, account: await this.accountView(user.id) };
+  }
+
+  /** Signs in by Google subject, else links the account with the same email, else creates a customer. */
+  async googleLogin(idToken: string, ctx: RequestContext): Promise<{ token: string; account: AccountView; created: boolean }> {
+    const profile = await this.deps.googleVerifier.verify(idToken);
+    if (!profile.emailVerified) {
+      throw new AppError(401, 'GOOGLE_EMAIL_UNVERIFIED', 'Your Google email address is not verified.');
+    }
+    const google = { ...profile, email: profile.email.toLowerCase() };
+    let result: { token: string; userId: number; created: boolean };
+    try {
+      result = await this.googleSignIn(google, ctx);
+    } catch (err) {
+      if ((err as { code?: string }).code !== 'ER_DUP_ENTRY') throw err;
+      result = await this.googleSignIn(google, ctx); // lost a race with a concurrent first sign-in: the winner's rows now exist
+    }
+    return { token: result.token, account: await this.accountView(result.userId), created: result.created };
+  }
+
+  private async googleSignIn(google: GoogleProfile, ctx: RequestContext): Promise<{ token: string; userId: number; created: boolean }> {
+    const now = new Date();
+    const identity = await repo.findIdentity(this.db, 'google', google.subject);
+    const existing = identity
+      ? await repo.findUserById(this.db, identity.user_id)
+      : await repo.findUserByEmail(this.db, google.email);
+    if (existing && existing.status !== 'active' && existing.status !== 'pending_verification') {
+      throw new AppError(403, 'ACCOUNT_DISABLED', 'This account is not available.');
+    }
+    return this.db.transaction(async (trx) => {
+      const user = existing ?? (await this.createGoogleUser(trx, google, now));
+      if (existing && !identity) await this.linkGoogle(trx, existing, google.subject, ctx, now);
+      if (existing?.status === 'pending_verification') await repo.activateUser(trx, existing.id, now);
+      const token = await this.issueSession(trx, user, 'auth.oauth_login', ctx, now);
+      return { token, userId: user.id, created: !existing };
+    });
+  }
+
+  private async createGoogleUser(trx: Knex.Transaction, google: GoogleProfile, now: Date): Promise<{ id: number; public_id: string }> {
+    const publicId = randomUUID();
+    const id = await repo.insertUser(trx, { publicId, email: google.email, passwordHash: null, fullName: google.name?.slice(0, 120) ?? null });
+    await repo.assignRole(trx, id, 'customer');
+    await repo.activateUser(trx, id, now); // Google vouched for the mailbox
+    await repo.insertIdentity(trx, { userId: id, provider: 'google', subject: google.subject });
+    return { id, public_id: publicId };
+  }
+
+  private async linkGoogle(trx: Knex.Transaction, user: repo.UserRow, subject: string, ctx: RequestContext, now: Date): Promise<void> {
+    if (!user.email_verified_at) {
+      // Nobody proved ownership of this mailbox before: whoever set the password may not be its owner.
+      await repo.clearPasswordAndVerify(trx, user.id, now);
+      await repo.revokeUserSessions(trx, user.id, now);
+    }
+    await repo.insertIdentity(trx, { userId: user.id, provider: 'google', subject });
+    await recordAudit(trx, { actorId: user.public_id, action: 'auth.oauth_link', targetType: 'user', targetId: user.public_id, requestId: ctx.requestId });
+  }
+
+  private async issueSession(
+    trx: Knex.Transaction, user: { id: number; public_id: string }, action: string, ctx: RequestContext, now: Date,
+  ): Promise<string> {
+    const { token, hash } = generateToken(); // fresh token every login: no session fixation
+    await repo.resetLoginState(trx, user.id, now);
+    await repo.createSession(trx, { userId: user.id, tokenHash: hash, expiresAt: new Date(now.getTime() + SESSION_TTL_MS), ip: ctx.ip, userAgent: ctx.userAgent });
+    await recordAudit(trx, { actorId: user.public_id, action, targetType: 'user', targetId: user.public_id, requestId: ctx.requestId });
+    return token;
   }
 
   async authenticate(sessionToken: string): Promise<AuthContext | null> {

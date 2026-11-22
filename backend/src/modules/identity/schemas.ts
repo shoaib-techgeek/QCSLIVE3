@@ -27,3 +27,4 @@ export const updateProfileSchema = z
     phone: phone.nullable().optional(),
   })
   .strict();
+export const googleLoginSchema = z.object({ idToken: z.string().min(20).max(4096) });
