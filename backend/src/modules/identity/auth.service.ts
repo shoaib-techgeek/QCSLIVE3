@@ -261,7 +261,7 @@ export class AuthService {
 
   async changePassword(auth: AuthContext, current: string, next: string, ctx: RequestContext): Promise<void> {
     const user = await repo.findUserById(this.db, auth.userId);
-    if (!user || !(await verifyPassword(current, user.password_hash))) {
+    if (!user || user.password_hash === null || !(await verifyPassword(current, user.password_hash))) { // Google-only: nothing to verify; reset-password sets one
       throw new AppError(400, 'INVALID_CURRENT_PASSWORD', 'Current password is incorrect.');
     }
     const passwordHash = await hashPassword(next);

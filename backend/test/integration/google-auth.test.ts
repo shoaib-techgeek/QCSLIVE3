@@ -218,6 +218,29 @@ describe('POST /api/v1/auth/oauth/google', () => {
   });
 });
 
+describe('accounts without a password (Google-only)', () => {
+  const post = (url: string, payload: object, cookie?: string) =>
+    ctx.app.inject({ method: 'POST', url, payload, headers: { ...H, ...(cookie ? { cookie } : {}) } });
+
+  it('change-password for a Google-only user returns 400 INVALID_CURRENT_PASSWORD', async () => {
+    const cookie = `sid=${sidOf(await signIn())!.value}`;
+    const res = await post('/api/v1/auth/change-password', { currentPassword: PASSWORD, newPassword: 'another-long-passphrase-9' }, cookie);
+    expect(res.statusCode).toBe(400);
+    expect(res.json().error.code).toBe('INVALID_CURRENT_PASSWORD');
+    expect((await ctx.db('users').first()).password_hash).toBeNull();
+  });
+
+  it('forgot-password then reset-password lets a Google-only user set a password and then log in with it', async () => {
+    await signIn();
+    ctx.mailer.outbox.length = 0;
+    expect((await post('/api/v1/auth/forgot-password', { email: 'jane@example.com' })).statusCode).toBe(202);
+    const token = /token=([\w-]+)/.exec(ctx.mailer.lastTo('jane@example.com')?.text ?? '')?.[1];
+    expect(token).toBeTruthy();
+    expect((await post('/api/v1/auth/reset-password', { token: token!, password: PASSWORD })).statusCode).toBe(204);
+    expect((await passwordLogin()).statusCode).toBe(200);
+  });
+});
+
 describe('POST /api/v1/auth/oauth/google without a client id', () => {
   it('returns 503 GOOGLE_SIGN_IN_DISABLED when no client id is configured', async () => {
     const off = await startTestApp({ GOOGLE_CLIENT_ID: '' });
