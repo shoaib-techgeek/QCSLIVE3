@@ -29,6 +29,9 @@ export class JoseGoogleVerifier implements GoogleVerifier {
       const { payload } = await jwtVerify(idToken, this.keys, {
         issuer: ['https://accounts.google.com', 'accounts.google.com'],
         audience: this.clientId,
+        algorithms: ['RS256'],
+        requiredClaims: ['exp', 'sub'],
+        clockTolerance: 5,
       });
       if (typeof payload.sub !== 'string' || typeof payload.email !== 'string') throw invalid();
       return {

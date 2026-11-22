@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { SignJWT, exportJWK, generateKeyPair, createLocalJWKSet } from 'jose';
+import { SignJWT, UnsecuredJWT, exportJWK, generateKeyPair, createLocalJWKSet } from 'jose';
 import { JoseGoogleVerifier } from '../../src/modules/identity/google-verifier.js';
 
 const clientId = 'client-123.apps.googleusercontent.com';
@@ -46,5 +46,40 @@ describe('JoseGoogleVerifier', () => {
     const { verifier, sign } = await setup();
     const other = await generateKeyPair('RS256');
     await expect(verifier.verify(await sign({ sub: 'x', email: 'a@b.co' }, { key: other.privateKey }))).rejects.toMatchObject({ code: 'INVALID_GOOGLE_TOKEN' });
+  });
+
+  it('rejects an HS256-signed token', async () => {
+    const { verifier } = await setup();
+    const token = await new SignJWT({ sub: 'x', email: 'a@b.co' })
+      .setProtectedHeader({ alg: 'HS256', kid: 'k1' })
+      .setIssuer(ISS).setAudience(clientId).setExpirationTime('5m')
+      .sign(new TextEncoder().encode('0123456789abcdef0123456789abcdef'));
+    await expect(verifier.verify(token)).rejects.toMatchObject({ code: 'INVALID_GOOGLE_TOKEN' });
+  });
+
+  it('rejects an unsigned (alg none) token', async () => {
+    const { verifier } = await setup();
+    const token = new UnsecuredJWT({ sub: 'x', email: 'a@b.co' })
+      .setIssuer(ISS).setAudience(clientId).setExpirationTime('5m').encode();
+    await expect(verifier.verify(token)).rejects.toMatchObject({ code: 'INVALID_GOOGLE_TOKEN' });
+  });
+
+  it('accepts issuer accounts.google.com without scheme', async () => {
+    const { verifier, sign } = await setup();
+    const token = await sign({ sub: 'g-2', email: 'a@b.co', email_verified: true }, { iss: 'accounts.google.com' });
+    expect((await verifier.verify(token)).subject).toBe('g-2');
+  });
+
+  it('rejects a token missing sub', async () => {
+    const { verifier, sign } = await setup();
+    await expect(verifier.verify(await sign({ email: 'a@b.co' }))).rejects.toMatchObject({ code: 'INVALID_GOOGLE_TOKEN' });
+  });
+
+  it('does not leak the token in the error message', async () => {
+    const { verifier, sign } = await setup();
+    const token = await sign({ sub: 'x', email: 'a@b.co' }, { aud: 'other' });
+    const err = await verifier.verify(token).catch((e: Error) => e);
+    expect((err as Error).message).not.toContain(token);
+    expect((err as Error).message).not.toContain(token.split('.')[1]!);
   });
 });
