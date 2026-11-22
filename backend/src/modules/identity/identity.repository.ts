@@ -130,8 +130,12 @@ export async function registerFailedLogin(db: Db, userId: number, max: number, l
   return false;
 }
 
-export const resetLoginState = (db: Db, userId: number, now: Date): Promise<unknown> =>
-  db('users').where({ id: userId }).update({ failed_login_count: 0, locked_until: null, last_login_at: now });
+/** With `expectedPasswordHash`, updates only if the hash is unchanged; returns the affected row count. */
+export function resetLoginState(db: Db, userId: number, now: Date, expectedPasswordHash?: string): Promise<number> {
+  const q = db('users').where({ id: userId });
+  if (expectedPasswordHash !== undefined) q.where({ password_hash: expectedPasswordHash });
+  return q.update({ failed_login_count: 0, locked_until: null, last_login_at: now });
+}
 
 export const activateUser = (db: Db, userId: number, now: Date): Promise<unknown> =>
   db('users')

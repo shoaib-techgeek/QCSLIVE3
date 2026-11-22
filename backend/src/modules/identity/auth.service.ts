@@ -123,15 +123,16 @@ export class AuthService {
   async login(input: { email: string; password: string }, ctx: RequestContext): Promise<{ token: string; account: AccountView }> {
     const now = new Date();
     const user = await repo.findUserByEmail(this.db, input.email);
-    if (!user) {
+    if (!user || user.password_hash === null) { // a null hash (Google-only account) gets the unknown-email path
       await verifyPassword(input.password, await getDummyHash());
       throw INVALID_CREDENTIALS();
     }
+    const passwordHash = user.password_hash;
     if (user.locked_until && user.locked_until > now) {
       throw new AppError(429, 'TOO_MANY_ATTEMPTS', 'Too many failed attempts. Try again later.');
     }
 
-    if (!(await verifyPassword(input.password, user.password_hash))) {
+    if (!(await verifyPassword(input.password, passwordHash))) {
       const locked = await repo.registerFailedLogin(this.db, user.id, MAX_FAILED_LOGINS, new Date(now.getTime() + LOCK_MS));
       await recordAudit(this.db, {
         actorId: user.public_id, action: locked ? 'auth.account_locked' : 'auth.login_failed',
@@ -148,7 +149,7 @@ export class AuthService {
       throw new AppError(403, 'ACCOUNT_DISABLED', 'This account is not available.');
     }
 
-    const token = await this.db.transaction((trx) => this.issueSession(trx, user, 'auth.login', ctx, now));
+    const token = await this.db.transaction((trx) => this.issueSession(trx, user, 'auth.login', ctx, now, passwordHash));
     return { token, account: await this.accountView(user.id) };
   }
 
@@ -208,9 +209,12 @@ export class AuthService {
 
   private async issueSession(
     trx: Knex.Transaction, user: { id: number; public_id: string }, action: string, ctx: RequestContext, now: Date,
+    checkedPasswordHash?: string,
   ): Promise<string> {
     const { token, hash } = generateToken(); // fresh token every login: no session fixation
-    await repo.resetLoginState(trx, user.id, now);
+    // The row lock serialises this against a Google link that clears the password (clearPasswordAndVerify):
+    // if the hash changed since it was checked, the password no longer grants access.
+    if ((await repo.resetLoginState(trx, user.id, now, checkedPasswordHash)) === 0) throw INVALID_CREDENTIALS();
     await repo.createSession(trx, { userId: user.id, tokenHash: hash, expiresAt: new Date(now.getTime() + SESSION_TTL_MS), ip: ctx.ip, userAgent: ctx.userAgent });
     await recordAudit(trx, { actorId: user.public_id, action, targetType: 'user', targetId: user.public_id, requestId: ctx.requestId });
     return token;

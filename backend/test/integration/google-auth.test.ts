@@ -1,10 +1,24 @@
 import { randomUUID } from 'node:crypto';
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { LightMyRequestResponse } from 'fastify';
 import { FakeGoogleVerifier, type GoogleProfile } from '../../src/modules/identity/google-verifier.js';
 import { hashPassword } from '../../src/modules/identity/password.js';
 import * as repo from '../../src/modules/identity/identity.repository.js';
 import { resetIdentityData, startTestApp, stopTestApp, type TestContext } from './helpers.js';
+
+// Passthrough mock: lets a test run code between a successful password check and the session insert.
+const hooks = vi.hoisted(() => ({ afterPasswordOk: null as null | (() => Promise<void>) }));
+vi.mock('../../src/modules/identity/password.js', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../../src/modules/identity/password.js')>();
+  return {
+    ...actual,
+    verifyPassword: async (password: string, stored: string) => {
+      const ok = await actual.verifyPassword(password, stored);
+      if (ok && hooks.afterPasswordOk) await hooks.afterPasswordOk();
+      return ok;
+    },
+  };
+});
 
 const H = { 'x-requested-with': 'XMLHttpRequest' };
 const URL = '/api/v1/auth/oauth/google';
@@ -17,6 +31,7 @@ beforeAll(async () => { ctx = await startTestApp({}, { googleVerifier: verifier 
 afterAll(async () => { await stopTestApp(ctx); });
 beforeEach(async () => {
   await resetIdentityData(ctx.db);
+  hooks.afterPasswordOk = null;
   verifier.tokens.clear();
   googleUser();
 });
@@ -26,6 +41,9 @@ function googleUser(p: Partial<GoogleProfile> = {}, token = TOKEN): void {
 }
 
 const signIn = (idToken = TOKEN) => ctx.app.inject({ method: 'POST', url: URL, payload: { idToken }, headers: H });
+
+const passwordLogin = () =>
+  ctx.app.inject({ method: 'POST', url: '/api/v1/auth/login', payload: { email: 'jane@example.com', password: PASSWORD }, headers: H });
 
 const sidOf = (res: LightMyRequestResponse) => res.cookies.find((c) => c.name === 'sid');
 
@@ -106,6 +124,29 @@ describe('POST /api/v1/auth/oauth/google', () => {
     expect(await count('sessions', { user_id: id, token_hash: 'a'.repeat(64), revoked_at: null })).toBe(0);
     expect(await count('sessions', { user_id: id, revoked_at: null })).toBe(1); // only the new Google session
     expect(await count('audit_events', { action: 'auth.oauth_link' })).toBe(1);
+  });
+
+  it('rejects the old password at /auth/login with 401 INVALID_CREDENTIALS after a never-verified account is linked', async () => {
+    await seedUser({ status: 'active', verified: false });
+    expect((await signIn()).statusCode).toBe(200);
+    const login = await passwordLogin();
+    expect(login.statusCode).toBe(401);
+    expect(login.json().error.code).toBe('INVALID_CREDENTIALS');
+    expect(sidOf(login)).toBeUndefined();
+  });
+
+  it('fails a password login whose hash is cleared by a Google link between the check and the session insert', async () => {
+    const id = await seedUser({ status: 'active', verified: false });
+    hooks.afterPasswordOk = async () => {
+      hooks.afterPasswordOk = null;
+      expect((await signIn()).statusCode).toBe(200); // the mailbox owner links Google inside the window
+    };
+    const login = await passwordLogin();
+    expect(login.statusCode).toBe(401);
+    expect(login.json().error.code).toBe('INVALID_CREDENTIALS');
+    expect(sidOf(login)).toBeUndefined();
+    expect(await count('sessions', { user_id: id, revoked_at: null })).toBe(1); // only the Google session
+    expect(await count('audit_events', { action: 'auth.login' })).toBe(0);
   });
 
   it('activates a pending_verification account when linking', async () => {
