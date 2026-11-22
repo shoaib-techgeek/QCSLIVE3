@@ -48,12 +48,15 @@ describe('JoseGoogleVerifier', () => {
     await expect(verifier.verify(await sign({ sub: 'x', email: 'a@b.co' }, { key: other.privateKey }))).rejects.toMatchObject({ code: 'INVALID_GOOGLE_TOKEN' });
   });
 
-  it('rejects an HS256-signed token', async () => {
-    const { verifier } = await setup();
+  it('rejects an HS256-signed token even when the key getter returns its secret', async () => {
+    const secret = new TextEncoder().encode('0123456789abcdef0123456789abcdef');
+    // createLocalJWKSet ignores oct keys, so use a getter that always returns the secret: only the algorithms allowlist can reject.
+    const keys = async () => secret;
+    const verifier = new JoseGoogleVerifier({ clientId, keys });
     const token = await new SignJWT({ sub: 'x', email: 'a@b.co' })
       .setProtectedHeader({ alg: 'HS256', kid: 'k1' })
       .setIssuer(ISS).setAudience(clientId).setExpirationTime('5m')
-      .sign(new TextEncoder().encode('0123456789abcdef0123456789abcdef'));
+      .sign(secret);
     await expect(verifier.verify(token)).rejects.toMatchObject({ code: 'INVALID_GOOGLE_TOKEN' });
   });
 
@@ -78,8 +81,9 @@ describe('JoseGoogleVerifier', () => {
   it('does not leak the token in the error message', async () => {
     const { verifier, sign } = await setup();
     const token = await sign({ sub: 'x', email: 'a@b.co' }, { aud: 'other' });
-    const err = await verifier.verify(token).catch((e: Error) => e);
-    expect((err as Error).message).not.toContain(token);
-    expect((err as Error).message).not.toContain(token.split('.')[1]!);
+    const rejection = expect(verifier.verify(token)).rejects;
+    await rejection.toThrow();
+    await rejection.not.toThrow(token);
+    await rejection.not.toThrow(token.split('.')[1]!);
   });
 });
