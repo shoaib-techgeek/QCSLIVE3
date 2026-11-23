@@ -50,7 +50,7 @@ export default function App() {
             <Route path="search" element={<SearchPage />} />
             <Route path="p/:slug" element={<ProductPage />} />
             <Route path="login" element={<LoginPage />} />
-            <Route path="registers" element={<RegisterPage />} />
+            <Route path="register" element={<RegisterPage />} />
             <Route path="verify-email" element={<VerifyEmailPage />} />
             <Route path="forgot-password" element={<ForgotPasswordPage />} />
             <Route path="reset-password" element={<ResetPasswordPage />} />

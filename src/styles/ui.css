@@ -147,3 +147,7 @@
   .product-card:hover { transform: none; }
 }
 
+
+.auth-divider { display: flex; align-items: center; gap: var(--space-3); color: var(--muted); margin: var(--space-4) 0; }
+.auth-divider::before, .auth-divider::after { content: ''; flex: 1; border-top: 1px solid var(--line); }
+.google-button { display: flex; justify-content: center; }

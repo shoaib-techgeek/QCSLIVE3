@@ -1,8 +1,10 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { register } from '../api/auth.js'
 import Field from '../components/Field.jsx'
 import { ErrorMessage, SuccessMessage } from '../components/FormMessage.jsx'
+import GoogleButton from '../components/GoogleButton.jsx'
+import { useAuth } from '../auth/AuthContext.jsx'
 import AuthShell from '../components/AuthShell.jsx'
 
 function validateRegistration({ email, password }) {
@@ -13,6 +15,8 @@ function validateRegistration({ email, password }) {
 }
 
 export default function RegisterPage() {
+  const { googleLogin } = useAuth()
+  const navigate = useNavigate()
   const [form, setForm] = useState({ fullName: '', email: '', password: '' })
   const [errors, setErrors] = useState({})
   const [formError, setFormError] = useState('')
@@ -42,6 +46,12 @@ export default function RegisterPage() {
     } finally {
       setSubmitting(false)
     }
+  }
+
+  async function onGoogle(idToken) {
+    setFormError('')
+    await googleLogin(idToken)
+    navigate('/account', { replace: true })
   }
 
   if (done && !done.verificationRequired) {
@@ -84,6 +94,7 @@ export default function RegisterPage() {
           {submitting ? 'Creating account…' : 'Create account'}
         </button>
       </form>
+      <GoogleButton onCredential={onGoogle} onError={setFormError} />
       <p>Already registered? <Link to="/login">Sign in</Link></p>
     </AuthShell>
   )

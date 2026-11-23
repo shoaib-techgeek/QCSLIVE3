@@ -3,10 +3,11 @@ import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext.jsx'
 import Field from '../components/Field.jsx'
 import { ErrorMessage } from '../components/FormMessage.jsx'
+import GoogleButton from '../components/GoogleButton.jsx'
 import AuthShell from '../components/AuthShell.jsx'
 
 export default function LoginPage() {
-  const { login, status } = useAuth()
+  const { login, googleLogin, status } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
   const [form, setForm] = useState({ email: '', password: '' })
@@ -31,6 +32,12 @@ export default function LoginPage() {
     }
   }
 
+  async function onGoogle(idToken) {
+    setError('')
+    await googleLogin(idToken)
+    navigate(location.state?.from ?? '/account', { replace: true })
+  }
+
   return (
     <AuthShell>
       <h1>Login</h1>
@@ -42,6 +49,7 @@ export default function LoginPage() {
           {submitting ? 'Signing in…' : 'Sign in'}
         </button>
       </form>
+      <GoogleButton onCredential={onGoogle} onError={setError} />
       <p><Link to="/forgot-password">Forgot your password?</Link></p>
       <p>New here? <Link to="/register">Create an account</Link></p>
     </AuthShell>

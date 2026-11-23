@@ -29,6 +29,12 @@ export function AuthProvider({ children }) {
     setStatus('authenticated')
   }, [])
 
+  const googleLogin = useCallback(async (idToken) => {
+    const r = await authApi.googleLogin(idToken)
+    setAccount(r.account)
+    setStatus('authenticated')
+  }, [])
+
   const logout = useCallback(async () => {
     try {
       await authApi.logout()
@@ -39,8 +45,8 @@ export function AuthProvider({ children }) {
   }, [])
 
   const value = useMemo(
-    () => ({ account, status, login, logout, setAccount }),
-    [account, status, login, logout],
+    () => ({ account, status, login, googleLogin, logout, setAccount }),
+    [account, status, login, googleLogin, logout],
   )
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }
