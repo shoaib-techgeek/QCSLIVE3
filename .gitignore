@@ -25,3 +25,4 @@ dist-ssr
 
 # Local file storage (KYC documents, uploads): never commit
 backend/storage/
+*.zip
