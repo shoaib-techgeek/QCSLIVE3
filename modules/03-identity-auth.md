@@ -34,6 +34,7 @@ FR-AUTH-01 … FR-AUTH-08, NFR-SEC-01/02/05/06, NFR-PRIV-02.
 ## Definition of Done
 - [ ] All FR-AUTH ACs automated; coverage ≥ 90%
 - [ ] Rate limits verified by integration tests
+- [x] Social login: Google (`POST /v1/auth/oauth/google`, auto-link by verified email) done; Apple not built
 - [ ] 2FA enforced for admin and seller owner roles
 - [ ] Account deletion job tested (data anonymised after grace period)
 

@@ -21,6 +21,8 @@ Multi-vendor, deal-first e-commerce marketplace (Temu-style; see [docs/PRODUCT.m
 1. Start MySQL (XAMPP) with databases `marketplace_dev` and `marketplace_test`.
 2. Backend: `cd backend && cp .env.example .env && npm install && npm run migrate && npm run seed:dev && npm run dev` (http://localhost:4000)
 3. Frontend: `npm install && npm run dev` (http://localhost:5173, proxies `/api` to the backend)
+4. Optional Google sign-in: create an OAuth Web Client ID in Google Cloud Console and add `http://localhost:5173` as an authorized JavaScript origin.
+   Set the same ID as `GOOGLE_CLIENT_ID` in `backend/.env` and `VITE_GOOGLE_CLIENT_ID` in the root `.env`; open the app at `localhost`, not `127.0.0.1`.
 
 ### Demo login (local development only)
 Created by `npm run seed:dev` (run `npm run migrate` first; also set `PII_ENCRYPTION_KEY` from `backend/.env.example` in `backend/.env` for seller verification); it refuses to run in production.
