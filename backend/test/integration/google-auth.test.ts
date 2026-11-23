@@ -50,12 +50,12 @@ const sidOf = (res: LightMyRequestResponse) => res.cookies.find((c) => c.name ==
 const count = async (table: string, where: Record<string, unknown> = {}) =>
   Number(((await ctx.db(table).where(where).count({ c: '*' }).first()) as { c: number | string }).c);
 
-async function seedUser(opts: { status: repo.UserStatus; verified: boolean; email?: string }) {
+async function seedUser(opts: { status: repo.UserStatus; verified: boolean; email?: string; roles?: string[] }) {
   const publicId = randomUUID();
   const id = await repo.insertUser(ctx.db, {
     publicId, email: opts.email ?? 'jane@example.com', passwordHash: await hashPassword(PASSWORD), fullName: 'Jane',
   });
-  await repo.assignRole(ctx.db, id, 'customer');
+  for (const role of opts.roles ?? ['customer']) await repo.assignRole(ctx.db, id, role);
   await ctx.db('users').where({ id }).update({ status: opts.status, email_verified_at: opts.verified ? new Date() : null });
   return id;
 }
@@ -77,6 +77,7 @@ describe('POST /api/v1/auth/oauth/google', () => {
     expect(me.statusCode).toBe(200);
     expect(await count('audit_events', { action: 'auth.oauth_login' })).toBe(1);
     expect(await count('audit_events', { action: 'auth.oauth_link' })).toBe(0);
+    expect(await ctx.db('audit_events').where({ action: 'auth.oauth_register' }).pluck('target_id')).toEqual([user.public_id]);
   });
 
   it('signs in again by sub without creating a second user', async () => {
@@ -177,6 +178,32 @@ describe('POST /api/v1/auth/oauth/google', () => {
     expect(res.json().error.code).toBe('ACCOUNT_DISABLED');
     expect(await count('user_identities')).toBe(0);
     expect(await count('sessions')).toBe(0);
+  });
+
+  it.each([{ roles: ['admin'] }, { roles: ['seller'] }, { roles: ['customer', 'seller'] }])(
+    'refuses an account with roles $roles with 403 SOCIAL_LOGIN_NOT_ALLOWED and writes nothing',
+    async ({ roles }) => {
+      const id = await seedUser({ status: 'active', verified: false, roles });
+      await repo.createSession(ctx.db, { userId: id, tokenHash: 'b'.repeat(64), expiresAt: new Date(Date.now() + 3600_000), ip: null, userAgent: null });
+      const before = (await repo.findUserById(ctx.db, id))!;
+      const res = await signIn();
+      expect(res.statusCode).toBe(403);
+      expect(res.json().error.code).toBe('SOCIAL_LOGIN_NOT_ALLOWED');
+      expect(sidOf(res)).toBeUndefined();
+      expect(await repo.findUserById(ctx.db, id)).toEqual(before);
+      expect(await count('user_identities')).toBe(0);
+      expect(await count('sessions', { user_id: id, revoked_at: null })).toBe(1);
+      expect(await count('audit_events')).toBe(0);
+    },
+  );
+
+  it('refuses a non-customer account already matched by Google subject', async () => {
+    expect((await signIn()).statusCode).toBe(200);
+    const user = await ctx.db('users').first();
+    await repo.assignRole(ctx.db, user.id, 'seller');
+    const res = await signIn();
+    expect(res.statusCode).toBe(403);
+    expect(res.json().error.code).toBe('SOCIAL_LOGIN_NOT_ALLOWED');
   });
 
   it('rejects email_verified=false with 401 GOOGLE_EMAIL_UNVERIFIED and creates nothing', async () => {

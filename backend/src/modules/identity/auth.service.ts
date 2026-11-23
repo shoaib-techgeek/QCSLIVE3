@@ -154,23 +154,23 @@ export class AuthService {
   }
 
   /** Signs in by Google subject, else links the account with the same email, else creates a customer. */
-  async googleLogin(idToken: string, ctx: RequestContext): Promise<{ token: string; account: AccountView; created: boolean }> {
+  async googleLogin(idToken: string, ctx: RequestContext): Promise<{ token: string; account: AccountView }> {
     const profile = await this.deps.googleVerifier.verify(idToken);
     if (!profile.emailVerified) {
       throw new AppError(401, 'GOOGLE_EMAIL_UNVERIFIED', 'Your Google email address is not verified.');
     }
     const google = { ...profile, email: profile.email.toLowerCase() };
-    let result: { token: string; userId: number; created: boolean };
+    let result: { token: string; userId: number };
     try {
       result = await this.googleSignIn(google, ctx);
     } catch (err) {
       if ((err as { code?: string }).code !== 'ER_DUP_ENTRY') throw err;
       result = await this.googleSignIn(google, ctx); // lost a race with a concurrent first sign-in: the winner's rows now exist
     }
-    return { token: result.token, account: await this.accountView(result.userId), created: result.created };
+    return { token: result.token, account: await this.accountView(result.userId) };
   }
 
-  private async googleSignIn(google: GoogleProfile, ctx: RequestContext): Promise<{ token: string; userId: number; created: boolean }> {
+  private async googleSignIn(google: GoogleProfile, ctx: RequestContext): Promise<{ token: string; userId: number }> {
     const now = new Date();
     const identity = await repo.findIdentity(this.db, 'google', google.subject);
     const existing = identity
@@ -179,21 +179,33 @@ export class AuthService {
     if (existing && existing.status !== 'active' && existing.status !== 'pending_verification') {
       throw new AppError(403, 'ACCOUNT_DISABLED', 'This account is not available.');
     }
+    if (existing) await this.assertCustomerOnly(existing.id);
     return this.db.transaction(async (trx) => {
-      const user = existing ?? (await this.createGoogleUser(trx, google, now));
+      const user = existing ?? (await this.createGoogleUser(trx, google, ctx, now));
       if (existing && !identity) await this.linkGoogle(trx, existing, google.subject, ctx, now);
       if (existing?.status === 'pending_verification') await repo.activateUser(trx, existing.id, now);
       const token = await this.issueSession(trx, user, 'auth.oauth_login', ctx, now);
-      return { token, userId: user.id, created: !existing };
+      return { token, userId: user.id };
     });
   }
 
-  private async createGoogleUser(trx: Knex.Transaction, google: GoogleProfile, now: Date): Promise<{ id: number; public_id: string }> {
+  /** Seller and admin accounts keep password-only sign-in (design non-goal: no staff social login). */
+  private async assertCustomerOnly(userId: number): Promise<void> {
+    const roles = await repo.getRoles(this.db, userId);
+    if (roles.length !== 1 || roles[0] !== 'customer') {
+      throw new AppError(403, 'SOCIAL_LOGIN_NOT_ALLOWED', 'Google sign-in is only available for customer accounts. Sign in with your email and password.');
+    }
+  }
+
+  private async createGoogleUser(
+    trx: Knex.Transaction, google: GoogleProfile, ctx: RequestContext, now: Date,
+  ): Promise<{ id: number; public_id: string }> {
     const publicId = randomUUID();
     const id = await repo.insertUser(trx, { publicId, email: google.email, passwordHash: null, fullName: google.name?.slice(0, 120) ?? null });
     await repo.assignRole(trx, id, 'customer');
     await repo.activateUser(trx, id, now); // Google vouched for the mailbox
     await repo.insertIdentity(trx, { userId: id, provider: 'google', subject: google.subject });
+    await recordAudit(trx, { actorId: publicId, action: 'auth.oauth_register', targetType: 'user', targetId: publicId, requestId: ctx.requestId });
     return { id, public_id: publicId };
   }
 

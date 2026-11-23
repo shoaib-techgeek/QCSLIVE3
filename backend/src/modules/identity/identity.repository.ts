@@ -49,6 +49,9 @@ export async function assignRole(db: Db, userId: number, roleName: string): Prom
   await db('user_roles').insert({ user_id: userId, role_id: role.id });
 }
 
+export const getRoles = (db: Db, userId: number): Promise<string[]> =>
+  db('user_roles as ur').join('roles as r', 'r.id', 'ur.role_id').where('ur.user_id', userId).pluck('r.name');
+
 export async function getPermissions(db: Db, userId: number): Promise<string[]> {
   return db('user_roles as ur')
     .join('role_permissions as rp', 'rp.role_id', 'ur.role_id')
