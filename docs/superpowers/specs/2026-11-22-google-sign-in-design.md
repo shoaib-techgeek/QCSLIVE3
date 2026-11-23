@@ -21,6 +21,7 @@ Customers can register and sign in with Google, ending in the same session cooki
 - Migration: `user_identities(id, user_id, provider, provider_subject UNIQUE with provider, created_at)` and `users.password_hash` nullable (reversible `down`).
 - Flow: identity by `sub` found: sign in. Else user by email found: link (account must be active); if that account never had a verified email (`email_verified_at` NULL), clear its password hash and revoke its sessions first. Else create an active user with the `customer` role and `email_verified_at` set.
 - Password login on a user with NULL hash returns INVALID_CREDENTIALS (the same timing path as an unknown email).
+- Only accounts whose roles are exactly `customer` may sign in or link with Google; any other role gets 403 SOCIAL_LOGIN_NOT_ALLOWED before anything is written.
 - Disabled accounts get ACCOUNT_DISABLED. Audit `auth.oauth_login` and `auth.oauth_link`.
 - Frontend: `src/api` function, a `GoogleButton` component in `src/components`, `VITE_GOOGLE_CLIENT_ID`. Button hidden when unset.
 
